@@ -26,10 +26,17 @@ export default function TabLayout() {
         // to prevent a hydration error in React Navigation v6.
         headerShown: useClientOnlyValue(false, true),
       }}>
+
       <Tabs.Screen
         name="index"
+        options={{href: null}} //hide from bottom tab
+      />
+
+      <Tabs.Screen
+        name="pets"
         options={{
           title: 'Mes animaux',
+          headerShown: false,
           tabBarIcon: ({ color }) => <TabBarIcon name="paw" color={color} />,
           headerRight: () => (
             <Link href="/modal" asChild>

@@ -11,7 +11,7 @@ type PetCardProps = {
 
 export const PetCard = ({ pet }: PetCardProps) => {
   return (
-    <Link href={`/${pet.id}`} asChild>
+    <Link href={`/pets/${pet.id}`} asChild>
       <Pressable style={styles.container}>
         <Text>{pet.name}</Text>
         <Image
