@@ -21,7 +21,13 @@ const pets: Pet[] = [
     sterilized: true,
     lieu_de_vie: "Exterieur",
     quantite_legumes: "Normale",
-    sexe: "Femelle"
+    sexe: "Femelle",
+    nutritional_needs: {
+      pet_id: 1,
+      calories: 2821.0,
+      rpc: 75.0,
+      calcium: 3.52625
+    }
   },
   {
     id: 2,
@@ -37,7 +43,8 @@ const pets: Pet[] = [
     sterilized: false,
     lieu_de_vie: "Interieur",
     quantite_legumes: "Faible",
-    sexe: "Male"
+    sexe: "Male",
+    nutritional_needs: null
   },
   {
     id: 3,
@@ -53,7 +60,8 @@ const pets: Pet[] = [
     sterilized: true,
     lieu_de_vie: "Exterieur",
     quantite_legumes: "Normale",
-    sexe: "Femelle"
+    sexe: "Femelle",
+    nutritional_needs: null
   },
   {
     id: 4,
@@ -69,7 +77,8 @@ const pets: Pet[] = [
     sterilized: true,
     lieu_de_vie: "Interieur et Exterieur",
     quantite_legumes: "Faible",
-    sexe: "Male"
+    sexe: "Male",
+    nutritional_needs: null
   },
   {
     id: 5,
@@ -85,7 +94,8 @@ const pets: Pet[] = [
     sterilized: false,
     lieu_de_vie: "Exterieur",
     quantite_legumes: "Normale",
-    sexe: "Male"
+    sexe: "Male",
+    nutritional_needs: null
   },
   {
     id: 6,
@@ -101,7 +111,8 @@ const pets: Pet[] = [
     sterilized: false,
     lieu_de_vie: "Interieur",
     quantite_legumes: "Faible",
-    sexe: "Femelle"
+    sexe: "Femelle",
+    nutritional_needs: null
   }
 ];
 

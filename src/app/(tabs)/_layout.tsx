@@ -55,10 +55,10 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="two"
+        name="recipes"
         options={{
-          title: 'Tab Two',
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
+          title: 'Mes recettes',
+          tabBarIcon: ({ color }) => <TabBarIcon name='cutlery' color={color} />,
         }}
       />
     </Tabs>

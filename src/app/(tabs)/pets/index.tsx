@@ -5,7 +5,7 @@ import { Text, View } from '@/components/Themed';
 import pets from '@assets/data/pets'
 import {PetCard} from "@/components/PetCard"
 
-export default function HomeScreen() {
+export default function PetsScreen() {
   return (
     <FlatList
       data={pets}
