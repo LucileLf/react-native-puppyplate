@@ -38,3 +38,41 @@ export type Ingredient = {
   phosphorus: number,
   potassium: number,
 }
+
+export type Weight = {
+    pet_id: number,
+    weight: number,
+    measurement_date: Date
+}
+
+export type Ration = {
+  id: number,
+  pet_id: number,
+  type_r: string,
+  cmv: string,
+  mode: string,
+  proteines: number,
+  lipides: number,
+  glucides: number,
+  cendres: number,
+  fibres: number,
+  ca: number,
+  p: number,
+  titre: string,
+  commentaire: string,
+  // viande: number,
+  // oeuf_id: number,
+  // laitage_id: number,
+  // legume_id: number,
+  // feculent_id: number,
+  // huile_id: number,
+  current: boolean,
+}
+
+
+export type RationIngredient = {
+  id: number,
+  ration_id: number,
+  ingredient_id: number,
+  quantity_g: number
+}

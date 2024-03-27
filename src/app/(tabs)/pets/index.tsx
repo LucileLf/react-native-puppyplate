@@ -2,18 +2,22 @@ import { FlatList, StyleSheet } from 'react-native';
 
 import EditScreenInfo from '@/components/EditScreenInfo';
 import { Text, View } from '@/components/Themed';
-import pets from '@assets/data/pets'
+import {pets} from '@assets/data/pets'
 import {PetCard} from "@/components/PetCard"
+import AddButton from '@/components/AddButton'
 
 export default function PetsScreen() {
   return (
-    <FlatList
-      data={pets}
-      renderItem={({item}) => <PetCard pet={item}/>}
-      numColumns={2}
-      contentContainerStyle={{gap: 10, padding: 10}}
-      columnWrapperStyle={{gap: 10}}
-    />
+    <>
+      <FlatList
+        data={pets}
+        renderItem={({item}) => <PetCard pet={item}/>}
+        numColumns={2}
+        contentContainerStyle={{gap: 10, padding: 10}}
+        columnWrapperStyle={{gap: 10}}
+      />
+      <AddButton text='Ajouter un animal'/>
+    </>
 
     // <View style={styles.container}>
     //   <Text style={styles.title}>Tab One</Text>

@@ -1,26 +1,46 @@
-import { Pet } from '@/types';
+import { Pet, Ration, Weight } from '@/types';
 import { Stack, useLocalSearchParams } from 'expo-router';
-import { View, Text, Image, StyleSheet } from 'react-native'
-import petsData from '@assets/data/pets'
+import { View, Text, Image, StyleSheet, ScrollView, FlatList } from 'react-native'
+import { pets, weights } from '@assets/data/pets'
+import { rations } from '@assets/data/food'
 import defaultPetImage from '@assets/images/no-pet-image.webp'
 import Colors from '@/constants/Colors';
 import { AntDesign } from '@expo/vector-icons'
+import { Chart, Line, Area, HorizontalAxis, VerticalAxis } from 'react-native-responsive-linechart'
+import ChartComponent from '@/components/ChartComponent';
+import { RationListItem } from '@/components/RationListItem';
 
 
 const PetDetailsScreen = () => {
+
   const { id } = useLocalSearchParams();
   const petIds: string[] = Array.isArray(id) ? id : [id];
-  let pet: Pet | undefined; // Declare pet outside the loop
+  let pet: Pet | undefined;
 
   petIds.forEach((petId: string) => {
-    pet = petsData.find((pet) => pet.id === parseInt(petId, 10));
+    pet = pets.find((pet) => pet.id === parseInt(petId, 10));
   });
 
-  return( pet &&
-    <View>
+  if (!pet) {
+    return (
+      <View style={styles.container}>
+        <Text>No pet data available</Text>
+      </View>
+    );
+  }
+
+  const petWeights: Weight[] | undefined = weights.filter(weight => weight.pet_id === pet?.id);
+  const currentRation: Ration | undefined = rations.find(ration => ration.current && ration.pet_id === pet?.id);
+  const otherRations: Ration[] | undefined = rations.filter(ration => ration.current === false && ration.pet_id === pet?.id);
+console.log("otherRations", otherRations);
+
+  return (
+    <ScrollView>
       <Stack.Screen options={{ title: pet.name}} />
       <View style={styles.container}>
-      <AntDesign name="edit" size={24} color="black" />
+
+        <AntDesign name="edit" size={24} color="black" />
+
         <View style={styles.profile}>
           <Image
             style={styles.profilePicture}
@@ -54,11 +74,23 @@ const PetDetailsScreen = () => {
 
         <View style={styles.weightContainer}>
           <Text style={styles.title}>Courbe de poids</Text>
-          <View style={styles.weightGraph}></View>
+          <View style={styles.weightGraph}>
+            <ChartComponent weightData={petWeights} />
+          </View>
+        </View>
+
+        <View style={styles.currentRationContainer}>
+          <Text style={styles.title}>Ration actuelle</Text>
+          <RationListItem ration={currentRation}/>
+        </View>
+
+        <View style={styles.rationsContainer}>
+          <Text style={styles.title}>Rations</Text>
+          {otherRations.map((item)=> <RationListItem ration={item}/>)}
         </View>
 
       </View>
-    </View>
+    </ScrollView>
   )
 };
 
@@ -78,7 +110,11 @@ const styles = StyleSheet.create({
   profile: {
     width: '100%',
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'space-evenly',
+    backgroundColor: 'white',
+    borderRadius: 8,
+    marginVertical: 4,
+    paddingVertical: 4,
   },
   profilePicture: {
     width: '50%',
@@ -117,11 +153,25 @@ const styles = StyleSheet.create({
     borderColor: 'black',
   },
   weightContainer: {
+    width: '100%',
+    // overflow: 'scroll',
 
   },
   weightGraph: {
+    // maxWidth: '100%'
+    // flex: 1
+  },
+  chart: {
+  },
+  currentRationContainer: {
 
   },
+  rationsContainer: {
+
+  },
+  rationsList: {
+
+  }
 });
 
 

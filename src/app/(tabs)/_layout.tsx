@@ -55,9 +55,10 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="recipes"
+        name="rations"
         options={{
           title: 'Mes recettes',
+          headerShown: false,
           tabBarIcon: ({ color }) => <TabBarIcon name='cutlery' color={color} />,
         }}
       />

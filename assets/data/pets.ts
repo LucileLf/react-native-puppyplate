@@ -1,12 +1,12 @@
 
-import { Pet } from '@/types';
+import { Pet, Weight } from '@/types';
 import fridaImage from '@assets/images/frida.jpg';
 import gastonImage from '@assets/images/gaston.webp';
 import bellaImage from '@assets/images/bella.webp';
 import leoImage from '@assets/images/leo.webp';
 import maxImage from '@assets/images/max.jpg';
 
-const pets: Pet[] = [
+export const pets: Pet[] = [
   {
     id: 1,
     user_id: 1,
@@ -116,5 +116,20 @@ const pets: Pet[] = [
   }
 ];
 
-
-export default pets;
+export const weights: Weight[] = [
+  {
+    pet_id: 1,
+    weight: 22.2,
+    measurement_date: new Date('2023-11-15')
+  },
+  {
+    pet_id: 1,
+    weight: 23,
+    measurement_date: new Date('2023-12-15')
+  },
+  {
+    pet_id: 1,
+    weight: 21.9,
+    measurement_date: new Date('2024-01-15')
+  }
+]
