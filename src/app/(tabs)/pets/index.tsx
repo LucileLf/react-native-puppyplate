@@ -5,6 +5,7 @@ import { Text, View } from '@/components/Themed';
 import {pets} from '@assets/data/pets'
 import {PetCard} from "@/components/PetCard"
 import AddButton from '@/components/AddButton'
+import { Link } from 'expo-router';
 
 export default function PetsScreen() {
   return (
@@ -16,7 +17,9 @@ export default function PetsScreen() {
         contentContainerStyle={{gap: 10, padding: 10}}
         columnWrapperStyle={{gap: 10}}
       />
-      <AddButton text='Ajouter un animal'/>
+      <Link href={`/pets/new`} asChild>
+        <AddButton text='Ajouter un animal'/>
+      </Link>
     </>
 
     // <View style={styles.container}>
