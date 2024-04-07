@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, Button, Switch, StyleSheet, ScrollView, Image, Pressable, TouchableOpacity } from 'react-native';
-import { Link, Stack } from 'expo-router';
+import React, { useEffect, useState } from 'react';
+import { View, Text, TextInput, Button, Switch, StyleSheet, ScrollView, Image, Pressable, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { Link, Stack, useRouter } from 'expo-router';
 import { Picker } from '@react-native-picker/picker';
-import { breeds, activity, stades, lieux, q_legumes } from '@assets/data/pets'
+// import { q_legumes } from '@assets/data/pets'
 import choice1 from '@assets/images/chien1.jpg'
 import choice2 from '@assets/images/chien2.jpg'
 import choice3 from '@assets/images/chien3.jpg'
@@ -12,33 +12,231 @@ import choice6 from '@assets/images/chien6.jpg'
 import choice7 from '@assets/images/chien7.jpg'
 import choice8 from '@assets/images/chien8.jpg'
 import choice9 from '@assets/images/chien9.jpg'
-
+import defaultImage from '@assets/images/no-pet-image.webp'
+import { Pet, NutritionalNeeds } from '@/types';
+import * as ImagePicker from 'expo-image-picker';
+import { useAuth } from '@/providers/AuthProvider';
+import { useInsertPet, useBreedList, useActivityList, useStageList, useEnvList, useVegList, useInsertNutritionalNeeds, useInsertPetWeight } from '@/api/pets';
+import { randomUUID } from 'expo-crypto'
+import { supabase } from '@/lib/supabase';
 
 const choices = [choice1, choice2, choice3, choice4, choice5, choice6, choice7, choice8, choice9]
 
 const AddPetForm = () => {
+
+  const router = useRouter();
+  const { session, loading } = useAuth()
+  const {mutateAsync: insertPet, data: newPet, isSuccess, isError, error: insertPetError} = useInsertPet(); // hook returns a function
+  const {mutate: insertNutritionalNeeds, error: insertNNError} = useInsertNutritionalNeeds(); // hook returns a function
+  const {mutate: insertPetWeight, error: insertWeightError} = useInsertPetWeight(); // hook returns a function
+  // const {mutate: addPetToNN, error: addPetToNNError} = useAddPetToNN(); // hook returns a function
+
+  const {data: breedsData, isLoading: isBreedsLoading, error: breedsError} = useBreedList()
+
+  const {data: activitiesData, isLoading: isActivitiesLoading, error: activitiesError} = useActivityList()
+  const {data: stagesData, isLoading: isStagesLoading, error: stagesError} = useStageList()
+  const {data: envData, isLoading: isEnvLoading, error: envError} = useEnvList()
+  const {data: vegData, isLoading: isVegLoading, error: vegError} = useVegList()
+
+//   console.log('activitiesData', activitiesData);
+// console.log('isActivitiesLoading', isActivitiesLoading);
+// console.log('activitiesError', activitiesError);
+
+  // const isLoading = loading || isBreedsLoading || isActivitiesLoading // || isStageLoading || isEnvLoading || isNutritionalNeedsLoading;
+  // const error = breedsError || activitiesError // || stageError || envError || nutritionalNeedsError; // shows first error encountered
+
+  // if (isLoading) { return <ActivityIndicator/>}
+  // if (error) { return <Text>Failed to fetch pets</Text> }
+
   const [formData, setFormData] = useState({
+    // id: '',
     name: '',
-    animal: '',
-    breed: '',
-    weight: '',
-    ideal_weight: 0,
-    activity: '',
-    life_stage: '',
+    // animal: 'Chien',
+    image: '',
+    breed: {"breed": "Akita Américain", "id": "b1"},
+    weight: 0.00,
+    ideal_weight: 0.00,
+    activity: {"activityLevel": "Normal", "id": "a1"},
+    life_stage: {"lifeStage": "Adulte (2 à 7 ans)", "id": "s2"},
     sterilized: false,
-    lieu_de_vie: '',
-    quantite_legumes: '',
-    sexe: '',
+    lieu_de_vie: {"environment": "Intérieur", "id": "e1"},
+    quantite_legumes: {"vegQuantity": "Normale", "id": "v1"},
+    sexe: 'F',
   });
 
-  const handleChange = (key, value) => {
+  // console.log(formData);
+ const handleSubmit = async (event: any) => {
+  event.preventDefault();
+    console.log('submitting Form data:', formData);
+
+    // insert pet
+    try{
+    const newPet = await insertPet({
+      user_id: session?.user.id,
+      petData: formData,
+      // onSuccess: () => {
+    })
+    console.log('Pet inserted successfully:', newPet);
+
+    // insert pet nutritional needs
+    const nutri_needs = calculate_nutri_needs()
+    console.log(nutri_needs)
+    const pet_nutri_needs = {...nutri_needs, pet_id: newPet.id}
+    insertNutritionalNeeds(pet_nutri_needs)
+
+    // insert current weight
+    //const current_weight = {pet_id: newPet.id, weight: newPet.weight, measurement_date: newPet.created_on}
+    insertPetWeight(newPet, newPet.created_on)
+    console.log("insertWeightError", insertWeightError);
+
+
+  }catch (error) {
+    console.error('Error inserting pet:', error);
+    // Handle errors, e.g., show an error message
+  }
+// console.log('isSuccess', isSuccess);
+// console.log('insertPetError', insertPetError);
+// console.log('newPet', newPet);
+
+
+// console.log("newPet from sumit", newPet);
+
+    //console.log("data from handlesubmit", newPet)
+// console.log("newPet from handlesubmit", returned);
+
+
+
+        // console.log(pet_nutri_needs)
+        // insertNutritionalNeeds(pet_nutri_needs);
+
+
+
+        resetFields(); // definition
+        router.back()
+
+    }
+
+
+  const handleChange = (key: any, value: any) => {
     setFormData({ ...formData, [key]: value });
   };
 
-  const handleSubmit = () => {
-    // Perform submission logic here, e.g., sending data to server
-    console.log('Form data:', formData);
+  const resetFields = () => {
+    // TO DO
+  }
+
+  const calculate_bmr = (rer: number) => {
+    let bmr = 0;
+    if (formData.life_stage === "Chiot (0 à 2 ans)") {
+      bmr = rer * 2.0
+    } else {
+      if (formData.sterilized) {
+        bmr = rer * 1.6
+      } else {
+        bmr = rer * 1.8
+      }
+    }
+    return bmr;
+  }
+
+  const  calculate_calories = (bmr: number) => {
+    let calories = 0;
+    console.log('formData.activity', formData.activity.activityLevel);
+
+    switch (formData.activity.activityLevel) {
+      case "HyperactifGrandSportif (+2h)":
+        calories = bmr * 1.9
+        break;
+      case "ActifSportif (+1h30 de sortie)":
+        calories = bmr * 1.725
+        break;
+      case "Normal":
+        calories = bmr * 1.55
+        break;
+      case "Calme":
+        calories = bmr * 1.375
+        break;
+      case "TrèsCalme":
+        calories = bmr * 1.2
+        break;
+      default:
+        console.log('Unmatched activity level:', formData.activity);
+        break;
+    }
+    return calories
+  }
+
+  const calculate_rpc = () => {
+    let rpc = 0;
+    // Entier ET actif
+    if (!formData.sterilized && (("Normal" || "ActifSportif (+1h30 de sortie)" || "HyperactifGrandSportif (+2h)").includes(formData.activity.activityLevel))) {
+      // chiot
+      if (formData.life_stage.lifeStage === "Chiot (0 à 2 ans)") {
+        rpc = 75
+      } else {
+        if (formData.weight < 10) rpc = 55;
+        else if (formData.weight >= 10 && formData.weight < 25) rpc = 60;
+        else rpc = 65;
+      }
+    }  else if (formData.sterilized || ("Calme" || "TrèsCalme" || "Convalescence").includes(formData.activity.activityLevel)) {
+      if (formData.life_stage.lifeStage === "Chiot (0 à 2 ans)") {
+        rpc = 94;
+      } else {
+        if (formData.weight < 10) rpc = 69;
+        else if (formData.weight >= 10 && formData.weight < 25) rpc = 75;
+        else rpc = 81;
+      }
+    }
+    // Stérilisé ET sédentaire
+    else {
+      if (formData.life_stage.lifeStage === "Chiot (0 à 2 ans)") {
+        rpc = 117;
+      } else {
+        if (formData.weight < 10) rpc = 86;
+        else if (formData.weight >= 10 && formData.weight < 25) rpc = 94;
+        else rpc = 102;
+      }
+    }
+    return rpc
   };
+
+  const calculate_nutri_needs = () => {
+    // calculate RER
+    const rer = 70 * ((formData.weight)*0.75)
+    console.log('rer', rer);
+
+    // calculate bmr (factor in sterilisé)
+    const bmr = calculate_bmr(rer)
+    console.log('bmr', bmr);
+
+    // calculate calories (factor in activity)
+    const calories = calculate_calories(bmr)
+    console.log('calories', calories);
+
+    // calculate rpc
+    const rpc = calculate_rpc()
+    console.log('rpc', rpc);
+
+    //CALCIUM
+    const calcium = (calories * 1.25)/1000
+    console.log('calcium', calcium);
+
+    // create nutritional needs anf assign to pet
+    const nutritional_needs: NutritionalNeeds ={
+      pet_id: 1, // TO DO !
+      calories,
+      rpc,
+      calcium
+    };
+    // return nutritional needs obj
+    return {
+      calories: calories,
+      rpc: rpc,
+      calcium: calcium,
+    }
+    //save to db
+  }
+
 
   const calculateIdealWeight = (index: number) => {
     let percentage: number = 0;
@@ -73,22 +271,39 @@ const AddPetForm = () => {
       default:
         percentage = 0; // No change
     }
-    const calculatedIdealWeight = parseInt(formData.weight) + parseInt(formData.weight) * percentage;
-    console.log('calculatedIdealWeight', calculatedIdealWeight);
+
+    // console.log('formData.weight', typeof(formData.weight));
+
+    const calculatedIdealWeight = formData.weight + formData.weight * percentage;
 
     setFormData({ ...formData, ideal_weight: calculatedIdealWeight })
   }
+
+  const pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+    console.log(result);
+
+    if (!result.canceled) {
+      // setImage(result.assets[0].uri);
+      setFormData({ ...formData, image: result.assets[0].uri })
+    }
+  };
+
+  // <Stack.Screen options={{ title: 'Ajouter un animal'}} />
 
   return (
 
     <ScrollView
       style={styles.container}
-      contentContainerStyle={{ alignItems: 'center', justifyContent: 'center'}}
+      contentContainerStyle={{ alignItems: 'center', justifyContent: 'center', paddingVertical: 50}}
     >
-      <Stack.Screen options={{ title: 'Ajouter un animal'}} />
 
       <Text style={{color:'white'}}>Cat or dog</Text>
-      {/* value={formData.animal} */}
 
       <TextInput
         style={styles.input}
@@ -97,16 +312,22 @@ const AddPetForm = () => {
         onChangeText={(text) => handleChange('name', text)}
       />
 
-      <Text style={{color:'white'}}>Image</Text>
+      <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}>
+        <Image source={ formData.image || defaultImage } style={styles.image}/>
+        <Text style={{color: 'white'}}>Selectionner </Text>
+        <TouchableOpacity onPress={pickImage} style={styles.imgButton}>
+          <Text style={{textAlign: 'center', fontWeight: '500'}}>...</Text>
+        </TouchableOpacity>
+        {/* <Text onPress={pickImage} style={styles.textButton}>Select Image</Text> */}
+      </View>
 
       <Text style={{ color: 'white' }}>Race</Text>
-      {/* Dropdown for selecting the animal type */}
       <Picker
         selectedValue={formData.breed}
         style={styles.input}
         onValueChange={(itemValue) => handleChange('breed', itemValue)}>
-          {breeds.map((breed) =>
-            <Picker.Item label={breed} value={breed} />
+          {breedsData?.map((breed) =>
+            <Picker.Item key={breed.id} label={breed.breed} value={breed} />
           )}
       </Picker>
 
@@ -123,8 +344,8 @@ const AddPetForm = () => {
         style={styles.input}
         placeholder="Poids"
         keyboardType="numeric"
-        value={formData.weight}
-        onChangeText={(text) => handleChange('weight', text)}
+        value={formData.weight.toString()}
+        onChangeText={(text) => handleChange('weight', parseFloat(text) || 0)}
       />
       <View style={styles.choices}>
         {choices.map((image, index)=>
@@ -154,8 +375,8 @@ const AddPetForm = () => {
         style={styles.input}
         onValueChange={(itemValue) => handleChange('activity', itemValue)}
       >
-        {activity.map((act) => (
-          <Picker.Item key={act} label={act} value={act} />
+        {activitiesData?.map((act) => (
+          <Picker.Item key={act.id} label={act.activityLevel} value={act} />
         ))}
       </Picker>
 
@@ -165,8 +386,8 @@ const AddPetForm = () => {
         style={styles.input}
         onValueChange={(itemValue) => handleChange('life_stage', itemValue)}
       >
-        {stades.map((stade) => (
-          <Picker.Item key={stade} label={stade} value={stade} />
+        {stagesData?.map((stage) => (
+          <Picker.Item key={stage.id} label={stage.lifeStage} value={stage} />
         ))}
       </Picker>
 
@@ -186,8 +407,8 @@ const AddPetForm = () => {
         style={styles.input}
         onValueChange={(itemValue) => handleChange('lieu_de_vie', itemValue)}
       >
-        {lieux.map((lieu) => (
-          <Picker.Item key={lieu} label={lieu} value={lieu} />
+        {envData?.map((lieu) => (
+          <Picker.Item key={lieu.id} label={lieu.environment} value={lieu} />
         ))}
       </Picker>
 
@@ -197,22 +418,24 @@ const AddPetForm = () => {
         style={styles.input}
         onValueChange={(itemValue) => handleChange('quantite_legumes', itemValue)}
       >
-        {q_legumes.map((q) => (
-          <Picker.Item key={q} label={q} value={q} />
+        {vegData?.map((q) => (
+          <Picker.Item key={q.id} label={q.vegQuantity} value={q} />
         ))}
       </Picker>
 
-      <Button title="Submit" onPress={handleSubmit} />
-      <Link href="/pets" asChild>
-        <Text style={styles.link}>Cancel</Text>
-      </Link>
+      <View style={{ width: '100%', flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: '5%' }}>
+        <Link href="/pets/" asChild>
+          <Text style={styles.link}>Cancel</Text>
+        </Link>
+        <Button title="Submit" onPress={handleSubmit} />
+      </View>
     </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flexGrow: 1
   },
   title: {
     fontSize: 20,
@@ -252,9 +475,19 @@ const styles = StyleSheet.create({
   },
   switch: {
   },
+  image: {
+    width: '35%',
+    aspectRatio: 1
+  },
+  imgButton: {
+    backgroundColor: 'white',
+    width: '10%',
+    height: 'auto',
+    borderRadius: 2
+  },
   link: {
     marginTop: 20,
-    color: 'blue',
+    color: 'white',
     textDecorationLine: 'underline',
   },
 });

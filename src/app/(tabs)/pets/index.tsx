@@ -1,13 +1,25 @@
-import { FlatList, StyleSheet } from 'react-native';
-
-import EditScreenInfo from '@/components/EditScreenInfo';
-import { Text, View } from '@/components/Themed';
-import {pets} from '@assets/data/pets'
+import { ActivityIndicator, FlatList, StyleSheet, Text } from 'react-native';
+import { useEffect, useState } from 'react'
 import {PetCard} from "@/components/PetCard"
 import AddButton from '@/components/AddButton'
 import { Link } from 'expo-router';
+import { supabase } from '@/lib/supabase';
+import { useQuery } from '@tanstack/react-query'
+import { Pet } from '@/types';
+import { usePetList } from '@/api/pets';
 
 export default function PetsScreen() {
+
+  const { data: pets, error, isLoading } =  usePetList()
+console.log('pets', pets);
+console.log('error', error);
+console.log('isLoading', isLoading);
+
+  if (isLoading) { return <ActivityIndicator/>}
+  if (error) { return <Text>Failed to fetch pets</Text> }
+
+  console.log('pets fetched from supabase', pets);
+
   return (
     <>
       <FlatList
@@ -22,11 +34,6 @@ export default function PetsScreen() {
       </Link>
     </>
 
-    // <View style={styles.container}>
-    //   <Text style={styles.title}>Tab One</Text>
-    //   <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
-    //   <EditScreenInfo path="app/(tabs)/index.tsx" />
-    // </View>
   );
 }
 

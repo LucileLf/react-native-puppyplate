@@ -23,10 +23,14 @@ export default function PetsStack () {
         name="index"
         options={{ title: 'Mes animaux' }}
       />
-   {/* <Stack.Screen
+   <Stack.Screen
         name="[id]"
-        options={{ title: 'Product details' }}
-      /> */}
+        options={{ title: 'AnimalName', headerShown: false }}
+      />
+   <Stack.Screen
+        name="new"
+        options={{ title: 'Ajouter un animal' }}
+      />
 
 {/*
 by default, title will be name of file (index, [id])

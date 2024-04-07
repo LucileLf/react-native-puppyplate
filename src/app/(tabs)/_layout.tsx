@@ -29,7 +29,7 @@ export default function TabLayout() {
 
       <Tabs.Screen
         name="index"
-        options={{href: null}} //hide from bottom tab
+        options={{href: null, headerShown: false}} //hide from bottom tab
       />
 
       <Tabs.Screen
@@ -60,6 +60,14 @@ export default function TabLayout() {
           title: 'Mes recettes',
           headerShown: false,
           tabBarIcon: ({ color }) => <TabBarIcon name='cutlery' color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: 'Profil',
+          headerShown: false,
+          tabBarIcon: ({ color }) => <TabBarIcon name='user' color={color} />,
         }}
       />
     </Tabs>

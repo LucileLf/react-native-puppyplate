@@ -11,7 +11,7 @@ export default function RecipesScreen() {
       <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
       <EditScreenInfo path="app/(tabs)/two.tsx" /> */}
 
-      <AddButton text='Add a recipe'/>
+      <AddButton text='Ajouter une recette'/>
     </View>
   );
 }

@@ -2,20 +2,23 @@ import Colors from '@/constants/Colors';
 import { Dimensions, StyleSheet, Text, View, Image, Pressable } from 'react-native';
 import { Pet } from '@/types'
 import { Link } from 'expo-router';
-import defaultPetImage from '@assets/images/no-pet-image.webp'
-
+// import {defaultPetImage} from '@assets/images/no-pet-image.webp'
+// import defaultPetImage from '@assets/images/no-pet-image.webp'
 
 type PetCardProps = {
   pet: Pet;
 }
 
 export const PetCard = ({ pet }: PetCardProps) => {
+  // const imagePath = `@assets/images/${pet.name}.jpg`
+  // console.log('pet iamge', pet.image);
+// const imageName = pet.image
   return (
     <Link href={`/pets/${pet.id}`} asChild>
       <Pressable style={styles.container}>
         <Text>{pet.name}</Text>
         <Image
-          source={ pet.image ? pet.image : defaultPetImage }
+          source={{uri: pet.image}}
           style={styles.image}
           resizeMode='contain'
         />

@@ -1,19 +1,31 @@
+export interface Profile {
+  id: string;
+  username: string;
+  full_name: string;
+  avatar_url?: string; // Optional if not all profiles have an avatar
+}
+
+export type ProfileImages = {
+  [key: string]: any;
+  defaultImage: any; // Same here
+};
+
 export type Pet = {
-  id: number;
+  id: string;
   user_id: number;
   name: string;
   image: string | null;
   animal: string;
-  breed: string;
+  breed: string; // FK breeds
   weight: number;
   ideal_weight: number;
-  activity: string;
-  life_stage: string;
+  activity: string; // FK activities
+  life_stage: string; // FK stages
   sterilized: boolean;
-  lieu_de_vie: string;
-  quantite_legumes: string;
-  sexe: string,
-  nutritional_needs: NutritionalNeeds | null
+  environment: string; // FK environments
+  veg_quantity: string; // FK veg_quantities
+  sexe: string, // FK
+  nutritional_needs: NutritionalNeeds | null // FK
 };
 
 export type NutritionalNeeds = {
@@ -39,10 +51,19 @@ export type Ingredient = {
   potassium: number,
 }
 
+export type FetchedWeightData = {
+  id: string,
+  pet_id: string,
+  weight: number,
+  measurement_date: string // coming as a string from the database
+};
+
+
 export type Weight = {
-    pet_id: number,
-    weight: number,
-    measurement_date: Date
+  id: string,
+  pet_id: number,
+  weight: number,
+  measurement_date: Date
 }
 
 export type Ration = {

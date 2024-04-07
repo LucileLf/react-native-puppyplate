@@ -1,5 +1,6 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Colors from '../constants/Colors';
+import { parme } from '../constants/Colors';
 import { forwardRef } from 'react';
 
 type AddButtonProps = {
@@ -23,6 +24,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 100,
     marginVertical: 10,
+    // width: '20%',
+    // aspectRatio: 1,
   },
   text: {
     fontSize: 16,
