@@ -69,9 +69,9 @@ export type Weight = {
 export type Ration = {
   id: number,
   pet_id: number,
-  type_r: string,
-  cmv: string,
-  mode: string,
+  type_r: string, 
+  cmv: string, 
+  mode: string, // ARRAY
   proteines: number,
   lipides: number,
   glucides: number,
@@ -80,7 +80,7 @@ export type Ration = {
   ca: number,
   p: number,
   titre: string,
-  commentaire: string,
+  commentaire: string
   // viande: number,
   // oeuf_id: number,
   // laitage_id: number,

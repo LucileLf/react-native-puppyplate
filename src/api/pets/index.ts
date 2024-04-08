@@ -282,6 +282,28 @@ export const usePetWeights = (petId: string, { enabled = true }) => {
   });
 }
 
+// READ RATIONS
+export const usePetRations = (petId: string, { enabled = true }) => {
+  console.log('api looking from rations with pet_id', petId);
+  return useQuery({
+    queryKey: ['rations', petId],
+    queryFn: async () => {
+      if (!enabled|| !petId) {
+        return null;
+      }
+      const { data, error } = await supabase
+        .from('rations')
+        .select('*')
+        .eq('pet_id', petId)
+      if (error) {
+        throw new Error(error.message);
+      }
+      console.log('rations fetched', data);
+      return data;
+    }
+  });
+}
+
 // CREATE PET
 export const useInsertPet = () =>  {
   const queryClient = useQueryClient();

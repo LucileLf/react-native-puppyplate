@@ -3,10 +3,11 @@ import { Stack, Link } from 'expo-router';
 import { View, Text, Image, StyleSheet, ScrollView, FlatList, ActivityIndicator } from 'react-native'
 import defaultPetImage from '@assets/images/no-pet-image.webp'
 import { AntDesign } from '@expo/vector-icons'
-import { usePetBreed, usePet, useActivity, useStage, useEnv, useVeg, usePetNutritionalNeeds, usePetWeights } from '@/api/pets';
+import { usePetBreed, usePet, useActivity, useStage, useEnv, useVeg, usePetNutritionalNeeds, usePetWeights, usePetRations } from '@/api/pets';
 import NutritionalTable from '@/components/NutritionTable'
 import AddButton from './AddButton';
 import ChartComponent from './ChartComponent';
+import { RationListItem } from './RationListItem';
 
 type PetDetailsProps = {
   pet: Pet;
@@ -38,6 +39,14 @@ export const PetDetails = ({ pet }: PetDetailsProps) => {
   const { data: weightsData, isLoading: isWeightsLoading, error: weightsError } = usePetWeights(pet.id, {
     enabled: !!pet
   });
+
+  const { data: rationsData, isLoading: isRationsLoading, error: rationsError } = usePetRations(pet.id, {
+    enabled: !!pet
+  });
+
+  console.log('rationsData', rationsData)
+  console.log('isRationsLoading', isRationsLoading)
+  console.log('rationsError', rationsError)
   // console.log("weightsData", weightsData);
   // console.log('isBreedLoading', isBreedLoading);
   // console.log('isActivityLoading', isActivityLoading);
@@ -121,10 +130,14 @@ export const PetDetails = ({ pet }: PetDetailsProps) => {
         </View> */}
 
 {/* other rations: if loadgin, act.ind / if none, dipaly nothing but button */}
+
         <View style={styles.rationsContainer}>
           <Text style={styles.title}>Rations</Text>
-
-          {/* {otherRations.map((item)=> <RationListItem key={item.id} ration={item}/>)} */}
+          {isRationsLoading && <ActivityIndicator/>}
+          {(!rationsData || rationsError) && <Text>No rations</Text>}
+          {rationsData &&
+            rationsData.map((ration)=> <RationListItem key={ration.id} ration={ration}/>)
+          }
           <AddButton text={`Ajouter une recette pour ${pet.name}`}/>
 
         </View>
