@@ -53,7 +53,7 @@ export type Weight = {
 }
 
 export type Ration = {
-  id: number,
+  id: string,
   pet_id: number,
   type_r: string,
   cmv: string,
