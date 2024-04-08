@@ -29,7 +29,7 @@ export const useRationIngredients = (id: string | string[]) => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('ration_ingredients')
-        .select('ingredient_id')
+        .select('*')
         .eq('ration_id', id)
       if (error) {
         throw new Error(error.message);
@@ -38,6 +38,28 @@ export const useRationIngredients = (id: string | string[]) => {
     },
   });
 };
+
+export const useIngredient = (ingredientId: string, { enabled = true } = {}) => {
+  console.log('looking for ingredient with ids', ingredientId);
+  return useQuery({
+    queryKey: ['ingredients', ingredientId],
+    queryFn: async () => {
+      if (!enabled|| !ingredientId ) {
+        return null;
+      }
+      const { data, error } = await supabase
+        .from('ingredients')
+        .select('*')
+        .eq('id', ingredientId)
+        .single();
+      if (error) {
+        throw new Error(error.message);
+      }
+      return data;
+    },
+  });
+};
+
 
 export const useIngredients = (ingredientIds: string[], { enabled = true } = {}) => {
   console.log('looking for ingredients with ids', ingredientIds);

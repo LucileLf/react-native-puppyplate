@@ -22,7 +22,6 @@ export const RationListItem = ({ ration }: RationListItemProps) => {
           <Text>{ration?.type_r}</Text>
           <Text>{ration?.cmv}</Text>
           <Text>{ration?.mode}</Text>
-          <Text style={{fontStyle: 'italic'}}>{ration?.comment}</Text>
         </View>
 
       </Pressable>

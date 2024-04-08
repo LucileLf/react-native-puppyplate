@@ -3,6 +3,7 @@ import { Stack, Link } from 'expo-router';
 import { View, Text, StyleSheet, ScrollView, ActivityIndicator } from 'react-native'
 import { AntDesign } from '@expo/vector-icons'
 import NutritionalTable from '@/components/NutritionTable'
+import {RationIngredientDetails} from '@/components/RationIngredientDetails'
 import { useRationIngredients } from '@/api/rations';
 
 type RationDetailsProps = {
@@ -11,19 +12,19 @@ type RationDetailsProps = {
 
 export const RationDetails = ({ ration }: RationDetailsProps) => {
 
-  const {data: ration_ingredients_ids, isLoading: isRationIngredientsLoading, error: rationIngredientsError} = useRationIngredients(ration.id)
+  const {data: ration_ingredients, isLoading: isRationIngredientsLoading, error: rationIngredientsError} = useRationIngredients(ration.id)
 
-  console.log('ration_ingredients', ration_ingredients_ids);
+  console.log('ration_ingredients', ration_ingredients);
   console.log('isRationIngredientsLoading', isRationIngredientsLoading);
   console.log('rationIngredientsError', rationIngredientsError);
 
   if (isRationIngredientsLoading) {return <ActivityIndicator/>}
 
-  if (!ration_ingredients_ids || rationIngredientsError) {return <Text>no ingredients</Text>}
+  if (!ration_ingredients || rationIngredientsError) {return <Text>no ingredients</Text>}
     return (
       <ScrollView>
         <Stack.Screen options={{ title: ration.title}} />
-        <Text style={{color: 'white'}}>{ration.comment}</Text>
+        <Text style={{color: 'white', fontStyle: 'italic'}}>{ration.comment}</Text>
         <View style={styles.container}>
           <Text>{ration.protein}</Text>
           <Text>{ration.fat}</Text>
@@ -32,7 +33,7 @@ export const RationDetails = ({ ration }: RationDetailsProps) => {
           <Text>{ration.fiber}</Text>
           <Text>{ration.calcium}</Text>
           <Text>{ration.potassium}</Text>
-          <Text>Pourcentage de nutrition pour Frida</Text>
+          <Text>Pourcentage de nutrition e l'animal</Text>
           <NutritionalTable nutritionalNeeds={
             {
               pet_id: ration.pet_id,
@@ -42,16 +43,13 @@ export const RationDetails = ({ ration }: RationDetailsProps) => {
               // Add more nutritional properties
             }
           } />
-          <AntDesign name="edit" size={24} color="black" />
-          {ration_ingredients_ids?.map((ingredient_id) => {
+          {/* <AntDesign name="edit" size={24} color="black" /> */}
+          {ration_ingredients?.map((ration_ingredient) => {
             return(
-              <Text>{ingredient_id.ingredient_id}</Text>
-              // a custom component with ingredient_id as prop
-              // const {data: ingredients, isLoading: isIngredientsLoading, error: ingredientsError} = useIngredients(ration_ingredients_ids)
-              // console.log('ingredients', ingredients);
-              // console.log('isIngredientsLoading', isIngredientsLoading);
-              // console.log('rationIngredientsError', rationIngredientsError);
-              // <Text key={ingredient.id}>{ingredient.FOOD_LABEL}</Text>
+              <View key={ration_ingredient.id} style={{flexDirection: 'row'}}>
+                <RationIngredientDetails ingredient_id={ration_ingredient.ingredient_id} />
+                <Text> ({ration_ingredient.quantity_g}g)</Text>
+              </View>
             )
           })}
         </View>
