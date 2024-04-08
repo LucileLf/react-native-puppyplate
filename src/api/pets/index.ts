@@ -304,6 +304,25 @@ export const usePetRations = (petId: string, { enabled = true }) => {
   });
 }
 
+export const useRation = (id: string | string[]) => {
+  console.log('looking for ration with id', id);
+  return useQuery({
+    queryKey: ['rations', id],
+
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('rations')
+        .select('*')
+        .eq('id', id)
+        .single();
+      if (error) {
+        throw new Error(error.message);
+      }
+      return data;
+    },
+  });
+};
+
 // CREATE PET
 export const useInsertPet = () =>  {
   const queryClient = useQueryClient();

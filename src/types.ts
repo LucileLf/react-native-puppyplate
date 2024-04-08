@@ -36,20 +36,6 @@ export type NutritionalNeeds = {
   // Add more nutritional properties
 };
 
-export type Ingredient = {
-  id: number;
-  name: string,
-  type: string,
-  calories: number,
-  proteins: number,
-  lipids: number,
-  carbs: number,
-  cendres: number,
-  fibres: number,
-  calcium: number,
-  phosphorus: number,
-  potassium: number,
-}
 
 export type FetchedWeightData = {
   id: string,
@@ -69,18 +55,18 @@ export type Weight = {
 export type Ration = {
   id: number,
   pet_id: number,
-  type_r: string, 
-  cmv: string, 
+  type_r: string,
+  cmv: string,
   mode: string, // ARRAY
-  proteines: number,
-  lipides: number,
-  glucides: number,
-  cendres: number,
-  fibres: number,
-  ca: number,
-  p: number,
-  titre: string,
-  commentaire: string
+  protein: number,
+  fat: number,
+  carb: number,
+  cendre: number,
+  fiber: number,
+  calcium: number,
+  potassium: number,
+  title: string,
+  comment: string,
   // viande: number,
   // oeuf_id: number,
   // laitage_id: number,
@@ -90,10 +76,24 @@ export type Ration = {
   current: boolean,
 }
 
-
 export type RationIngredient = {
   id: number,
   ration_id: number,
   ingredient_id: number,
   quantity_g: number
+}
+
+export type Ingredient = {
+  id: number;
+  name: string,
+  type: string,
+  calories: number,
+  proteins: number,
+  lipids: number,
+  carbs: number,
+  cendres: number,
+  fibres: number,
+  calcium: number,
+  phosphorus: number,
+  potassium: number,
 }

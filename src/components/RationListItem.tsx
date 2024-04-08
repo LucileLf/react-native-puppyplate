@@ -17,10 +17,12 @@ export const RationListItem = ({ ration }: RationListItemProps) => {
           resizeMode='contain'
         />
         <View style={styles.rationDetails}>
-          <Text style={{fontWeight: 'bold'}}>{ration?.titre}</Text>
+          <Text style={{color: 'green', fontWeight: "500"}}>{ration?.current && "Ration actuelle"}</Text>
+          <Text style={{fontWeight: 'bold'}}>{ration?.title}</Text>
           <Text>{ration?.type_r}</Text>
           <Text>{ration?.cmv}</Text>
           <Text>{ration?.mode}</Text>
+          <Text style={{fontStyle: 'italic'}}>{ration?.comment}</Text>
         </View>
 
       </Pressable>
