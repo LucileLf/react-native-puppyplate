@@ -16,7 +16,7 @@ import defaultImage from '@assets/images/no-pet-image.webp'
 import { Pet, NutritionalNeeds } from '@/types';
 import * as ImagePicker from 'expo-image-picker';
 import { useAuth } from '@/providers/AuthProvider';
-import { useInsertPet, useBreedList, useActivityList, useStageList, useEnvList, useVegList, useInsertNutritionalNeeds, useInsertPetWeight } from '@/api/pets';
+import { useInsertPet, useBreedList, useActivityList, useStageList, useEnvList, useVegList, useInsertNutritionalNeeds, useAddPetToNN, useInsertInitialPetWeight } from '@/api/pets';
 import { randomUUID } from 'expo-crypto'
 import { supabase } from '@/lib/supabase';
 
@@ -28,7 +28,7 @@ const AddPetForm = () => {
   const { session, loading } = useAuth()
   const {mutateAsync: insertPet, data: newPet, isSuccess, isError, error: insertPetError} = useInsertPet(); // hook returns a function
   const {mutate: insertNutritionalNeeds, error: insertNNError} = useInsertNutritionalNeeds(); // hook returns a function
-  const {mutate: insertPetWeight, error: insertWeightError} = useInsertPetWeight(); // hook returns a function
+  const {mutate: insertInitialPetWeight, error: insertWeightError} = useInsertInitialPetWeight(); // hook returns a function
   // const {mutate: addPetToNN, error: addPetToNNError} = useAddPetToNN(); // hook returns a function
 
   const {data: breedsData, isLoading: isBreedsLoading, error: breedsError} = useBreedList()
@@ -86,7 +86,7 @@ const AddPetForm = () => {
 
     // insert current weight
     //const current_weight = {pet_id: newPet.id, weight: newPet.weight, measurement_date: newPet.created_on}
-    insertPetWeight(newPet, newPet.created_on)
+    insertInitialPetWeight(newPet)
     console.log("insertWeightError", insertWeightError);
 
 

@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, Button, Switch, StyleSheet, ScrollView, Image, Pressable, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, Button, Switch, StyleSheet, ScrollView, Image, Pressable, TouchableOpacity, ActivityIndicator, Platform } from 'react-native';
 import { Link, Stack, useLocalSearchParams, useRouter, usePathname } from 'expo-router';
 import { Picker } from '@react-native-picker/picker';
 // import { q_legumes } from '@assets/data/pets'
 import { useAuth } from '@/providers/AuthProvider';
-import { useInsertPet, useBreedList, useActivityList, useStageList, useEnvList, useVegList, useInsertNutritionalNeeds, useAddPetToNN, useInsertInitialPetWeight, useInsertPetWeight, usePet } from '@/api/pets';
+import { useInsertPetWeight, usePet } from '@/api/pets';
 import { randomUUID } from 'expo-crypto'
 import { supabase } from '@/lib/supabase';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { format } from 'date-fns';
 
 
 const AddPetWeightForm = () => {
@@ -16,38 +18,72 @@ const AddPetWeightForm = () => {
   // const {mutate: insertInitialPetWeight, error: insertWeightError} = useInsertInitialPetWeight(); // hook returns a function
   const {mutate: insertPetWeight, error: insertWeightError} = useInsertPetWeight(); // hook returns a function
   // const {mutate: addPetToNN, error: addPetToNNError} = useAddPetToNN(); // hook returns a function
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
   const { id } = useLocalSearchParams();
   console.log('idFromParams', id)
+  console.log('typeofidFromParams', typeof(id))
+  console.log('showDatePicker', showDatePicker)
 
-  const { data: pet, isLoading, error } = usePet(id)
 
-  if (isLoading) return <ActivityIndicator/>
-  if (error) return <Text>Error</Text>
 
   const [formData, setFormData] = useState({
-    weight: Number,
-    measurement_date: Date
+    weight: 0,
+    measurement_date: new Date()
   });
 
+
   // console.log(formData);
- const handleSubmit = async (event: any) => {
+  const handleSubmit = async (event: any) => {
     event.preventDefault();
     console.log('submitting Form data:', formData);
-    insertPetWeight(pet, formData.measurement_date)
-
-    // resetFields();
-    router.back()
+    try{
+      insertPetWeight({
+        petId: Array.isArray(id) ? id[0] : id,
+        weight: formData.weight,
+        date: formData.measurement_date
+      })
+      resetFields();
+      router.back()
+    }  catch (error) {
+      console.log('insertWeightError', insertWeightError)
+    }
   }
 
+    const resetFields = () => {
+      // TO DO
+    }
 
   const handleChange = (key: any, value: any) => {
     setFormData({ ...formData, [key]: value });
   };
 
-  const resetFields = () => {
-    // TO DO
-  }
+  // const setDate = (event: any) => {
+  //   console.log('event from stdate', event);
+  //   // console.log('ondatachange hi');
+
+  //   // const currentDate = selectedDate || formData.measurement_date;
+  //   // setShowDatePicker(Platform.OS === 'ios');
+
+  //   // setFormData({ ...formData, measurement_date: currentDate.toISOString() });
+  //   // console.log('Date selected:', currentDate);
+  // };
+  const showDatepicker = () => {
+    setShowDatePicker(true)
+  };
+
+  const onDateChange = (event: any, selectedDate: Date) => {
+    const currentDate = selectedDate;
+    setShowDatePicker(false);
+    setFormData({...formData, measurement_date: currentDate});
+    console.log('selectedDate', selectedDate);
+  };
+
+  const formatDate = (date: Date) => {
+    // Format date as you prefer
+    return date.toLocaleDateString('fr-FR');
+  };
+
 
   return (
 
@@ -64,13 +100,29 @@ const AddPetWeightForm = () => {
         onChangeText={(text) => handleChange('weight', parseFloat(text) || 0)}
       />
 
-      {/* <TextInput
-        style={styles.input}
-        placeholder="Date de mesure"
-        value={formData.measurement_date}
-        onChangeText={(text) => handleChange('weight', text)}
-      /> */}
 
+      <TouchableOpacity onPress={showDatepicker} >
+        <TextInput
+          style={styles.input}
+          placeholder="Date de mesure"
+          value={formatDate(formData.measurement_date)}
+          editable={false}
+          // onChangeText={(text) => handleChange('weight', text)}
+        />
+      </TouchableOpacity>
+
+
+      {/* <Button onPress={showDatepicker} title="Show date picker!" />
+      <Text>selected: {formData.measurement_date.toLocaleString()}</Text> */}
+
+      {showDatePicker && (
+        <DateTimePicker
+          value={new Date(formData.measurement_date)}
+          mode="date"
+          display="default"
+          onChange={onDateChange}
+        />
+      )}
 
       <View style={{ width: '100%', flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: '5%' }}>
         <Link href={`/pets/${id}`} asChild>
@@ -100,6 +152,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     backgroundColor: 'white'
   },
+  datePickerButton: {
+    width: '100%'
+  },
+  // datePicker: {
+  //   backgroundColor: 'white',
+  //   width: '100%'
+  // },
   choices: {
     // width: '100%',
     // flexDirection: 'row',

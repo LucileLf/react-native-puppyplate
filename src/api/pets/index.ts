@@ -360,15 +360,15 @@ export const useInsertNutritionalNeeds = () =>  {
 }
 
 // CREATE WEIGHT ON PET CREATION
-export const useInsertPetWeight = () =>  {
+export const useInsertInitialPetWeight = () =>  {
   const queryClient = useQueryClient();
   return useMutation({
-    async mutationFn(newPet: any, date: any) {
-      console.log('inserting weight for', newPet)
+    async mutationFn(newPet: any) {
+      console.log('inserting initial weight for', newPet)
       const { error, data: newWeight } = await supabase.from('weights').insert({
         pet_id: newPet.id,
         weight: newPet.weight,
-        measurement_date: date
+        measurement_date: newPet.created_on
       })
       .select()
       .single()
@@ -400,6 +400,46 @@ export const useInsertPetWeight = () =>  {
   })
 }
 
+// CREATE NEW WEIGHT FOR PET
+export const useInsertPetWeight = () =>  {
+  const queryClient = useQueryClient();
+  return useMutation({
+    async mutationFn({petId, weight, date}: any) {
+      console.log(`inserting new weight ${weight} for pet with id ${petId} at date ${date}`, )
+      const { error, data: newWeight } = await supabase.from('weights').insert({
+        pet_id: petId,
+        weight,
+        measurement_date: date
+      })
+      .select()
+      .single()
+      console.log('newWeight inserted', newWeight);
+      console.log('error', error);
+
+      if (error) {
+        console.log('error from insertpetweight', error);
+
+        throw new Error(error.message);
+      }
+      console.log('inserted weight', newWeight );
+
+      return newWeight;
+    },
+    onSuccess: (newWeight) => {
+      //console.log('data after success', newPet);
+      // invalidate the query cache for the 'Pets' key --> query get executed again
+      console.log("newWeight after success", newWeight);
+      console.log("weight inserted");
+        queryClient.invalidateQueries({queryKey: ['weights', newWeight.pet_id]});
+    },
+    //invalidate the query cache for the 'Pets' key --> query get executed again
+    // async onSuccess() {
+    //   await queryClient.invalidateQueries({queryKey: ['pets']});
+    //   console.log("pet inserted");
+
+    // },
+  })
+}
 
 // UPDATE
 
