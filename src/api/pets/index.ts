@@ -272,7 +272,7 @@ export const usePetWeights = (petId: string, { enabled = true }) => {
         .from('weights')
         .select('*')
         .eq('pet_id', petId)
-
+        .order('measurement_date', { ascending: true });
       if (error) {
         throw new Error(error.message);
       }
