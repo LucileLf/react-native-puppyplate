@@ -2,6 +2,55 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase';
 import { NutritionalNeeds, Pet, Weight } from '@/types';
 
+
+// READ PET RATIONS
+export const usePetRations = (petId: string, { enabled = true }) => {
+  console.log('api looking from rations with pet_id', petId);
+  return useQuery({
+    queryKey: ['rations', petId],
+    queryFn: async () => {
+      if (!enabled|| !petId) {
+        return null;
+      }
+      const { data, error } = await supabase
+        .from('rations')
+        .select('*')
+        .eq('pet_id', petId)
+      if (error) {
+        throw new Error(error.message);
+      }
+      console.log('rations fetched', data);
+      return data;
+    }
+  });
+}
+
+// SELECT PET CURRENT RATION
+export const useCurrentPetRation = (petId: string, { enabled = true }) => {
+  console.log('api looking from rations with pet_id', petId);
+  return useQuery({
+    queryKey: ['rations', petId],
+    queryFn: async () => {
+      if (!enabled|| !petId) {
+        return null;
+      }
+      const { data, error } = await supabase
+        .from('rations')
+        .select('*')
+        .eq('pet_id', petId)
+        .eq('current', true)
+        .single();
+      if (error) {
+        throw new Error(error.message);
+      }
+      console.log('rations fetched', data);
+      return data;
+    }
+  });
+}
+
+
+
 export const useRation = (id: string | string[]) => {
   console.log('looking for ration with id', id);
   return useQuery({
@@ -20,6 +69,8 @@ export const useRation = (id: string | string[]) => {
     },
   });
 };
+
+// useCurrentRation
 
 export const useRationIngredients = (id: string | string[]) => {
   console.log('looking for ingredients with ration_id', id);

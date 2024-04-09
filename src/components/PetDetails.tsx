@@ -3,7 +3,8 @@ import { Stack, Link } from 'expo-router';
 import { View, Text, Image, StyleSheet, ScrollView, FlatList, ActivityIndicator } from 'react-native'
 import defaultPetImage from '@assets/images/no-pet-image.webp'
 import { AntDesign } from '@expo/vector-icons'
-import { usePetBreed, usePet, useActivity, useStage, useEnv, useVeg, usePetNutritionalNeeds, usePetWeights, usePetRations } from '@/api/pets';
+import { usePetBreed, usePet, useActivity, useStage, useEnv, useVeg, usePetNutritionalNeeds, usePetWeights } from '@/api/pets';
+import { usePetRations } from '@/api/rations';
 import NutritionalTable from '@/components/NutritionTable'
 import AddButton from './AddButton';
 import ChartComponent from './ChartComponent';

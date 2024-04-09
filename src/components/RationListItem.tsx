@@ -2,6 +2,8 @@ import { Ration } from "@/types";
 import { View, Text, Image, StyleSheet, ScrollView, FlatList, Pressable } from 'react-native'
 import rationPicture from '@assets/images/dog-food.jpg'
 import { Link } from 'expo-router';
+import AntDesign from "@expo/vector-icons/build/AntDesign";
+import { Feather } from '@expo/vector-icons';
 
 interface RationListItemProps {
   ration: Ration | undefined
@@ -23,7 +25,7 @@ export const RationListItem = ({ ration }: RationListItemProps) => {
           <Text>{ration?.cmv}</Text>
           <Text>{ration?.mode}</Text>
         </View>
-
+        <Feather name="check-circle" size={24} color={ration?.current ? 'green' : 'lightgray'} style={styles.checkMark} />
       </Pressable>
     </Link>
   )
@@ -39,17 +41,17 @@ const styles = StyleSheet.create({
    marginVertical: 4,
   },
   image: {
-    flex: 1,
+    // flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    width: '35%',
+    width: '25%',
     aspectRatio: 1,
   },
   rationDetails:{
-
+    width: '65%'
   },
-  titre: {
-
+  checkMark: {
+    width: '10%',
   }
 });
 
