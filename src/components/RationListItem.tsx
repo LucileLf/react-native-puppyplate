@@ -4,17 +4,19 @@ import rationPicture from '@assets/images/dog-food.jpg'
 import { Link } from 'expo-router';
 import AntDesign from "@expo/vector-icons/build/AntDesign";
 import { Feather } from '@expo/vector-icons';
-import { useUpdateRationToCurrent } from "@/api/rations";
+import { useUpdateRationToCurrent, useUpdateRationToNotCurrent } from "@/api/rations";
 
 interface RationListItemProps {
   ration: Ration
 }
 
 export const RationListItem = ({ ration }: RationListItemProps) => {
-  const { mutate: updateRationToCurrent, error } = useUpdateRationToCurrent(ration.id)
-  console.log('error', error)
+  const { mutate: updateRationToCurrent, error: errorSettingToCurrent } = useUpdateRationToCurrent(ration.id)
+  const { mutate: updateRationToNotCurrent, error: errorSettingToNotCurrent } = useUpdateRationToNotCurrent(ration.id)
+  console.log('errorSettingToCurrent', errorSettingToCurrent)
+  console.log('errorSettingToNotCurrent', errorSettingToNotCurrent)
   console.log('updateRationToCurrent', updateRationToCurrent)
-  
+
   return (
     <>
       <Link href={`/rations/${ration.id}`} asChild>
@@ -34,7 +36,9 @@ export const RationListItem = ({ ration }: RationListItemProps) => {
 
         </Pressable>
       </Link>
-      <TouchableOpacity onPress={() => updateRationToCurrent()}>
+      <TouchableOpacity onPress={() => {
+        ration.current ? updateRationToNotCurrent() : updateRationToCurrent()
+      }}>
         <Feather name="check-circle" size={24} color={ration.current ? 'green' : 'lightgray'} style={styles.checkMark} />
       </TouchableOpacity>
     </>

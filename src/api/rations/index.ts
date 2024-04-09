@@ -130,11 +130,51 @@ export const useIngredients = (ingredientIds: string[], { enabled = true } = {})
 
 export const useUpdateRationToCurrent = ( id: string | string[] ) =>  {
   const queryClient = useQueryClient();
+  console.log("hi from update ration to current");
+
+  return useMutation({
+    mutationFn: async () => {
+      const { error: errorUpdatingTarget, data: updatedRation } = await supabase
+        .from('rations')
+        .update({ current: true })
+        .eq('id', id)
+        // .select()
+        .single();
+
+        console.log("errorUpdatingTarget:", errorUpdatingTarget);
+      if (errorUpdatingTarget) throw new Error(errorUpdatingTarget.message);
+
+      const { error: errorUpdatingOthers } = await supabase
+      .from('rations')
+      .update({ current: false })
+      .not('id', 'eq', id);
+
+      console.log("error updating others", errorUpdatingOthers);
+      if (errorUpdatingOthers) throw new Error(errorUpdatingOthers.message);
+
+      return updatedRation;
+    },
+    //invalidate the query cache for the 'products' key --> query get executed again
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({queryKey:['rations']});
+      if (typeof id === 'string') {
+        // Invalidate specific ration query if a single id was provided
+        await queryClient.invalidateQueries({queryKey: ['rations', id]});
+      }
+    },
+     onError: (error) => {
+      console.error('Failed to update ration', error);
+    }
+  })
+}
+
+export const useUpdateRationToNotCurrent = ( id: string | string[] ) =>  {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async () => {
       const { error, data: updatedRation } = await supabase
         .from('rations')
-        .update({ current: true })
+        .update({ current: false })
         .eq('id', id)
         // .select()
         .single()
