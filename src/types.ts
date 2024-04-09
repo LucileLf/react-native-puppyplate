@@ -57,7 +57,7 @@ export type Ration = {
   pet_id: number,
   type_r: string,
   cmv: string,
-  mode: string, // ARRAY
+  mode: string, // 
   protein: number,
   fat: number,
   carb: number,

@@ -49,8 +49,6 @@ export const useCurrentPetRation = (petId: string, { enabled = true }) => {
   });
 }
 
-
-
 export const useRation = (id: string | string[]) => {
   console.log('looking for ration with id', id);
   return useQuery({
@@ -69,8 +67,6 @@ export const useRation = (id: string | string[]) => {
     },
   });
 };
-
-// useCurrentRation
 
 export const useRationIngredients = (id: string | string[]) => {
   console.log('looking for ingredients with ration_id', id);
@@ -111,7 +107,6 @@ export const useIngredient = (ingredientId: string, { enabled = true } = {}) => 
   });
 };
 
-
 export const useIngredients = (ingredientIds: string[], { enabled = true } = {}) => {
   console.log('looking for ingredients with ids', ingredientIds);
   return useQuery({
@@ -132,3 +127,31 @@ export const useIngredients = (ingredientIds: string[], { enabled = true } = {})
     enabled: enabled && ingredientIds.length > 0,
   });
 };
+
+export const useUpdateRationToCurrent = ( id: string | string[] ) =>  {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async () => {
+      const { error, data: updatedRation } = await supabase
+        .from('rations')
+        .update({ current: true })
+        .eq('id', id)
+        // .select()
+        .single()
+      if (error) {
+        throw new Error(error.message);
+      }
+      console.log("updatedRation", updatedRation)
+      return updatedRation;
+    },
+    //invalidate the query cache for the 'products' key --> query get executed again
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({queryKey:['rations']});
+      await queryClient.invalidateQueries({queryKey:['rations', id]});
+    },
+    //  onError(error) => {
+    //   console.error('Failed to update ration', error);
+
+    // }
+  })
+}

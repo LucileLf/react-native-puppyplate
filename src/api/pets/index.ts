@@ -442,50 +442,50 @@ export const useInsertPetWeight = () =>  {
   })
 }
 
-// UPDATE
+// // UPDATE
 
-export const useUpdatePet = () =>  {
-  const queryClient = useQueryClient();
-  return useMutation({
-    async mutationFn(data: any) {
-      const { error, data: updatedPet } = await supabase.from('pets').update({
-        name: data.name,
-        image: data.image,
-        price: data.price
-      })
-      .eq('id', data.id)
-      .select()
-      .single()
+// export const useUpdatePet = () =>  {
+//   const queryClient = useQueryClient();
+//   return useMutation({
+//     async mutationFn(data: any) {
+//       const { error, data: updatedPet } = await supabase.from('pets').update({
+//         name: data.name,
+//         image: data.image,
+//         price: data.price
+//       })
+//       .eq('id', data.id)
+//       .select()
+//       .single()
 
-      if (error) {
-        throw new Error(error.message);
-      }
-      return updatedPet;
-    },
-    //invalidate the query cache for the 'Pets' key --> query get executed again
-    async onSuccess(_, data) {
-      await queryClient.invalidateQueries({queryKey:['pets']});
-      await queryClient.invalidateQueries({queryKey:['pets', data.id]});
-    },
-    //  onError(error) {
+//       if (error) {
+//         throw new Error(error.message);
+//       }
+//       return updatedPet;
+//     },
+//     //invalidate the query cache for the 'Pets' key --> query get executed again
+//     async onSuccess(_, data) {
+//       await queryClient.invalidateQueries({queryKey:['pets']});
+//       await queryClient.invalidateQueries({queryKey:['pets', data.id]});
+//     },
+//     //  onError(error) {
 
-    // }
-  })
-}
+//     // }
+//   })
+// }
 
-// DELETE
+// // DELETE
 
-export const useDeletePet = () =>  {
-  const queryClient = useQueryClient();
-  return useMutation({
-    async mutationFn(id: number) {
-      const {error} = await supabase.from('pets').delete().eq('id', id)
-      if (error) {
-        throw new Error(error.message)
-      }
-    },
-    async onSuccess() {
-      await queryClient.invalidateQueries({queryKey:['pets']});
-    },
-  })
-}
+// export const useDeletePet = () =>  {
+//   const queryClient = useQueryClient();
+//   return useMutation({
+//     async mutationFn(id: number) {
+//       const {error} = await supabase.from('pets').delete().eq('id', id)
+//       if (error) {
+//         throw new Error(error.message)
+//       }
+//     },
+//     async onSuccess() {
+//       await queryClient.invalidateQueries({queryKey:['pets']});
+//     },
+//   })
+// }
