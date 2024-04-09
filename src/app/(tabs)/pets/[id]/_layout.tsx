@@ -33,8 +33,12 @@ export default function PetStack () {
       options={{ title: 'Animal' }}
     />
     <Stack.Screen
-      name="new_weight"
+      name="new-weight"
       options={{ title: `Enregistrez un poids pour ${pet.name}` }}
+    />
+    <Stack.Screen
+      name="new-ration"
+      options={{ title: `Créez une ration ${pet.name}` }}
     />
 
   </Stack>;

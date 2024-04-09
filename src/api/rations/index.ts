@@ -195,3 +195,32 @@ export const useUpdateRationToNotCurrent = ( id: string | string[] ) =>  {
     // }
   })
 }
+
+  // fetch type_r
+  // fetch cm
+  // fetch mode
+
+
+  // fetch Viandes, Oeufs, Laitages, Légumes, Féculents, Huiles
+export const useIngredientSubGroup = (subgroup: string) => {
+  const subgroups = ['viandes cuites', 'viandes crues', 'charcuteries et assimilés', 'autres produits à base de viande', 'poissons cuits', 'poissons crus', 'mollusques et crustacés cuits', 'mollusques et crustacés crus', 'produits à base de poissons et produits de la mer', 'substitus de produits carnés']
+  // console.log('looking for ingredients with ids', subgroup);
+  return useQuery({
+    queryKey: ['ingredients', subgroup],
+    queryFn: async () => {
+      if (!subgroup || subgroups.length === 0) {
+        return null;
+      }
+      const { data, error } = await supabase
+        .from('ingredients')
+        .select('*')
+        .in('alim_ssgrp_nom_fr', subgroups);
+      if (error) {
+        throw new Error(error.message);
+      }
+      console.log(`${data.length}ingredients in subgroup ${subgroup}`);
+
+      return data;
+    },
+  });
+};

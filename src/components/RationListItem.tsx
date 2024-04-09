@@ -19,28 +19,33 @@ export const RationListItem = ({ ration }: RationListItemProps) => {
 
   return (
     <>
-      <Link href={`/rations/${ration.id}`} asChild>
-        <Pressable style={styles.rationContainer}>
-          <Image
-            source={rationPicture}
-            style={styles.image}
-            resizeMode='contain'
-          />
-          <View style={styles.rationDetails}>
-            <Text style={{color: 'green', fontWeight: "500"}}>{ration.current && "Ration actuelle"}</Text>
-            <Text style={{fontWeight: 'bold'}}>{ration.title}</Text>
-            <Text>{ration.type_r}</Text>
-            <Text>{ration.cmv}</Text>
-            <Text>{ration.mode}</Text>
-          </View>
+      <Text style={{color: 'green', fontWeight: "500"}}>{ration.current && "Ration actuelle"}</Text>
+      <View style={styles.rationContainer}>
+        <Link href={`/rations/${ration.id}`} asChild>
+          <Pressable style={styles.rationContainer}>
+            <Image
+              source={rationPicture}
+              style={styles.image}
+              resizeMode='contain'
+            />
+            <View style={styles.rationDetails}>
+              <Text style={{fontWeight: 'bold'}}>{ration.title}</Text>
+              <Text>{ration.type_r}</Text>
+              <Text>{ration.cmv}</Text>
+              <Text>{ration.mode}</Text>
+            </View>
 
-        </Pressable>
-      </Link>
-      <TouchableOpacity onPress={() => {
-        ration.current ? updateRationToNotCurrent() : updateRationToCurrent()
-      }}>
-        <Feather name="check-circle" size={24} color={ration.current ? 'green' : 'lightgray'} style={styles.checkMark} />
-      </TouchableOpacity>
+          </Pressable>
+        </Link>
+        <TouchableOpacity
+          style={styles.checkMark}
+          onPress={() => {
+            ration.current ? updateRationToNotCurrent() : updateRationToCurrent()
+          }}
+        >
+          <Feather name="check-circle" size={24} color={ration.current ? 'green' : 'gainsboro'} />
+        </TouchableOpacity>
+      </View>
     </>
   )
 };
@@ -51,8 +56,8 @@ const styles = StyleSheet.create({
    alignItems: 'center',
    backgroundColor: 'white',
    borderRadius: 8,
-  //  marginHorizontal: 1,
    marginVertical: 4,
+   padding: 0
   },
   image: {
     // flex: 1,
