@@ -1,33 +1,41 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, Button, Switch, StyleSheet, ScrollView, Image, Pressable, TouchableOpacity, ActivityIndicator, Platform } from 'react-native';
+import { View, Text, TextInput, Button, Switch, StyleSheet, ScrollView, Image, Pressable, TouchableOpacity, ActivityIndicator, Platform, FlatList } from 'react-native';
 import { useIngredientSubGroup } from '@/api/rations';
-// import { ReactiveBase, SingleList } from "@appbaseio/reactivesearch";
-
+import { AutocompleteDropdownContextProvider, AutocompleteDropdown  } from 'react-native-autocomplete-dropdown';
 
 const AddPetRationForm = () => {
 
   // const router = useRouter();
   // const { id } = useLocalSearchParams();
+  const [inputValue, setInputValue] = useState('');
+  const [showSuggestions, setShowSuggestions] = useState(false);
 
   // fetch type_r
   // fetch cm
   // fetch mode
   // fetch viande
   const {data: viandes, isLoading: isViandeLoading, error: viandeError} = useIngredientSubGroup('viande');
+  console.log(`${viandes?.length} viandes`);
+
+  // const [selectedItem, setSelectedItem] = useState(null);
+
+  // const viandes = [
+  //   {
+  //     id: 'V01',
+  //     title: 'saumon'
+  //   },
+  //   {
+  //     id: 'V02',
+  //     title: 'chicken'
+  //   }
+  // ]
+
   // fetch Oeufs
   // fetch Laitages
   // fetch Légumes
   // fetch Féculents
   // fetch Huiles
 
-  if (isViandeLoading) return <ActivityIndicator/>
-  if (viandeError) return <Text>error in fetching viande</Text>
-
-    // console.log(viandes);
-  const transformedData = viandes?.map(viande => ({
-    label: viande.FOOD_LABEL, // The text to be displayed for each list item
-    value: viande.FOOD_LABEL  // The value to be used for searching/filtering
-  }));
 
   const [formData, setFormData] = useState({
     type_r: 'PRO BARF (sans amidon)',
@@ -65,8 +73,20 @@ const AddPetRationForm = () => {
     setFormData({ ...formData, [key]: value });
   };
 
+  const handleInputChange = (text: string) => {
+    setInputValue(text);
+    setShowSuggestions(text.length >= 3);
+  };
 
+  const selectItem = (item: {id: string, title: string} | null) => {
+    if (item) {
+      handleChange('viande', item.title)
+      // console.log('viande', item);
+    }
+  }
   return (
+    <AutocompleteDropdownContextProvider>
+
 
     <ScrollView
       style={styles.container}
@@ -97,19 +117,34 @@ const AddPetRationForm = () => {
       />
 
       <Text style={{color: 'white'}}>Viande</Text>
-      {/* <SingleList
-        componentId="ViandeSensor"
-        dataField="FOOD_LABEL"
-        title="Viandes"
-        compoundClause={'filter'}
-      /> */}
 
-      <TextInput
+      <AutocompleteDropdown
+        clearOnFocus={false}
+        closeOnBlur={true}
+        closeOnSubmit={false}
+        initialValue={formData.viande}
+        onSelectItem={(item) => selectItem(item)}
+        dataSet={showSuggestions ? viandes : null}
+        onChangeText={(text) => {handleInputChange(text)}}
+
+        // dataSet={viandes}
+        inputContainerStyle={[styles.input, {position: 'relative'}]}
+        suggestionsListContainerStyle={{
+          // position: 'absolute',
+          top: -90, // Adjust this based on the height of your input field
+          left: 0,
+          right: 0,
+        }}
+        showChevron={false}
+      />
+
+      <Text style={{color: 'white'}}>{formData.viande}</Text>
+      {/* <TextInput
         style={styles.input}
         placeholder="Sélectionner..."
         value={formData.viande}
         onChangeText={(text) => handleChange('viande', text)}
-      />
+      /> */}
 
       <Text style={{color: 'white'}}>Oeuf</Text>
       <TextInput
@@ -158,7 +193,9 @@ const AddPetRationForm = () => {
         <Button title="Submit" onPress={handleSubmit} />
       </View> */}
     </ScrollView>
+  </AutocompleteDropdownContextProvider>
   );
+
 };
 
 const styles = StyleSheet.create({
@@ -225,6 +262,11 @@ const styles = StyleSheet.create({
     color: 'white',
     textDecorationLine: 'underline',
   },
+  itemText: {
+    // Style for your list items
+    backgroundColor: 'white',
+    padding: 10,
+  }
 });
 
 export default AddPetRationForm;

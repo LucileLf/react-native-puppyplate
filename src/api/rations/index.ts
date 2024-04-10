@@ -218,7 +218,7 @@ export const useIngredientSubGroup = (subgroup: string) => {
       if (error) {
         throw new Error(error.message);
       }
-      console.log(`${data.length}ingredients in subgroup ${subgroup}`);
+      // console.log(`${data.length}ingredients in subgroup ${subgroup}`);
 
       return data;
     },
