@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase';
 import { NutritionalNeeds, Pet, Weight } from '@/types';
+import { PetDetails } from '@/components/PetDetails';
 
 
 // READ PET RATIONS
@@ -196,7 +197,6 @@ export const useUpdateRationToNotCurrent = ( id: string | string[] ) =>  {
   })
 }
 
-  // fetch Viandes, Oeufs, Laitages, Légumes, Féculents, Huiles
 export const useIngredientSubGroup = (subgroup: string) => {
   let subgroups: String[]
     switch(subgroup) {
@@ -239,3 +239,47 @@ export const useIngredientSubGroup = (subgroup: string) => {
     },
   });
 };
+
+// CREATE RATION
+export const useInsertPetRation = () =>  {
+  const queryClient = useQueryClient();
+  return useMutation({
+    async mutationFn({petId, data}: any) {
+      console.log(`inserting new ration for pet with id ${petId}`, data )
+      const { error, data: newRation } = await supabase.from('rations').insert({
+        pet_id: petId,
+        title: data.title,
+        comment: data.comment,
+        type: data.type_r,
+        cmv: data.cmv,
+        mode: data.mode
+      })
+      .select()
+      .single()
+      console.log('newWeight inserted', newRation);
+      console.log('error', error);
+
+      if (error) {
+        console.log('error from insertpetweight', error);
+
+        throw new Error(error.message);
+      }
+      console.log('inserted weight', newRation );
+
+      return newRation;
+    },
+    onSuccess: (newRation) => {
+      //console.log('data after success', newPet);
+      // invalidate the query cache for the 'Pets' key --> query get executed again
+      console.log("newRation after success", newRation);
+      console.log("ration inserted");
+        queryClient.invalidateQueries({queryKey: ['rations', newRation.pet_id]});
+    },
+    //invalidate the query cache for the 'Pets' key --> query get executed again
+    // async onSuccess() {
+    //   await queryClient.invalidateQueries({queryKey: ['pets']});
+    //   console.log("pet inserted");
+
+    // },
+  })
+}

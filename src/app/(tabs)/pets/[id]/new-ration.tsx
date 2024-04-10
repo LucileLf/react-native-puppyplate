@@ -1,14 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, Button, Switch, StyleSheet, ScrollView, Image, Pressable, TouchableOpacity, ActivityIndicator, Platform, FlatList } from 'react-native';
-import { useIngredientSubGroup } from '@/api/rations';
+import { useIngredientSubGroup, useInsertPetRation } from '@/api/rations';
 import { AutocompleteDropdownContextProvider, AutocompleteDropdown  } from 'react-native-autocomplete-dropdown';
 import { Picker } from '@react-native-picker/picker';
 import { supabase } from '@/lib/supabase';
+import { Link, useLocalSearchParams, useRouter } from 'expo-router';
 
 const AddPetRationForm = () => {
 
-  // const router = useRouter();
-  // const { id } = useLocalSearchParams();
+  const router = useRouter();
+  const { id } = useLocalSearchParams();
+  const petId = id
   const [inputValue, setInputValue] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
 
@@ -16,77 +18,61 @@ const AddPetRationForm = () => {
   const [cmvEnum, setCmvEnum] = useState([]);
   const [modeEnum, setModeEnum] = useState([]);
 
-  // fetch viande
   const {data: viandes, isLoading: isViandeLoading, error: viandeError} = useIngredientSubGroup('viande');
-  console.log(`${viandes?.length} viandes`);
-
-  // fetch Oeufs
   const {data: oeufs, isLoading: isOeufsLoading, error: oeufError} = useIngredientSubGroup('oeuf');
-  console.log(`${oeufs?.length} oeufs`);
-
-  // fetch Laitages
   const {data: laitages, isLoading: isLaitagesLoading, error: laitageError} = useIngredientSubGroup('laitage');
-  console.log(`${laitages?.length} laitages`);
-
-  // fetch Légumes
   const {data: legumes, isLoading: isLegumesLoading, error: legumeError} = useIngredientSubGroup('legume');
-  console.log(`${legumes?.length} legumes`);
-
-  // fetch Féculents
   const {data: feculents, isLoading: isFeculentsLoading, error: feculentError} = useIngredientSubGroup('feculent');
-  console.log(`${feculents?.length} feculents`);
-
-  // fetch Huiles
   const {data: huiles, isLoading: isHuilesLoading, error: huileError} = useIngredientSubGroup('huile');
-  console.log(`${huiles?.length} huiles`);
+  const {mutate: insertPetRation, error: insertPetRationError} = useInsertPetRation(); // hook returns a function
 
+  useEffect(() => {
+    // fetch type_r
+    async function fetchTypeREnum() {
+      try {
+        let { data, error } = await supabase.rpc('get_enum_values_for_types_r');
+        if (error) throw error;
 
-
-useEffect(() => {
-  // fetch type_r
-  async function fetchTypeREnum() {
-    try {
-      let { data, error } = await supabase.rpc('get_enum_values_for_types_r');
-      if (error) throw error;
-
-      // Storing the result in the component state
-      setTypeREnum(data);
-    } catch (error) {
-      console.error(error);
+        // Storing the result in the component state
+        setTypeREnum(data);
+      } catch (error) {
+        console.error(error);
+      }
     }
-  }
-  // fetch cmv
-  async function fetchCmvEnum() {
-    try {
-      let { data, error } = await supabase.rpc('get_enum_values_for_cmv');
-      if (error) throw error;
+    // fetch cmv
+    async function fetchCmvEnum() {
+      try {
+        let { data, error } = await supabase.rpc('get_enum_values_for_cmv');
+        if (error) throw error;
 
-      // Storing the result in the component state
-      setCmvEnum(data);
-    } catch (error) {
-      console.error(error);
+        // Storing the result in the component state
+        setCmvEnum(data);
+      } catch (error) {
+        console.error(error);
+      }
     }
-  }
-  // fetch mode
-  async function fetchModeEnum() {
-    try {
-      let { data, error } = await supabase.rpc('get_enum_values_for_cmv');
-      if (error) throw error;
+    // fetch mode
+    async function fetchModeEnum() {
+      try {
+        let { data, error } = await supabase.rpc('get_enum_values_for_cmv');
+        if (error) throw error;
 
-      // Storing the result in the component state
-      setModeEnum(data);
-    } catch (error) {
-      console.error(error);
+        // Storing the result in the component state
+        setModeEnum(data);
+      } catch (error) {
+        console.error(error);
+      }
     }
-  }
 
-  fetchTypeREnum();
-  fetchCmvEnum();
-  fetchModeEnum();
-}, []);
+    fetchTypeREnum();
+    fetchCmvEnum();
+    fetchModeEnum();
+  }, []);
 
 
   const [formData, setFormData] = useState({
+    title: '',
+    comment: '',
     type_r: 'PRO BARF (sans amidon)',
     cmv: "Vit'i5 Orange (pot 600g)",
     mode: '100% ration ménagère',
@@ -98,28 +84,34 @@ useEffect(() => {
     huile: '',
   });
 
-  // const handleSubmit = async (event: any) => {
-  //   event.preventDefault();
-  //   console.log('submitting Form data:', formData);
-  //   try{
-  //     insertPetWeight({
-  //       petId: Array.isArray(id) ? id[0] : id,
-  //       weight: formData.weight,
-  //       date: formData.measurement_date
-  //     })
-  //     resetFields();
-  //     router.back()
-  //   }  catch (error) {
-  //     console.log('insertWeightError', insertWeightError)
-  //   }
-  // }
 
-  // const resetFields = () => {
-  //   // TO DO
-  // }
 
-  const handleChange = (key: any, value: any) => {
-    setFormData({ ...formData, [key]: value });
+  const handleSubmit = async (event: any) => {
+    event.preventDefault();
+    console.log('submitting Form data:', formData);
+    // insert ration
+    // insertPetRation(petId, formData)
+    try{
+      insertPetRation({
+        petId: Array.isArray(petId) ? petId[0] : petId,
+        data: formData
+      })
+      resetFields();
+      router.back()
+    }  catch (error) {
+      console.log('insertPetRation', insertPetRation)
+    }
+
+    // insert ration ingredients
+    // calculate nutrition value
+  }
+
+  const resetFields = () => {
+    // TO DO
+  }
+
+  const handleChange = (ingredient_type: string, id: string) => {
+    setFormData({ ...formData, [ingredient_type]: id });
   };
 
   const handleInputChange = (text: string) => {
@@ -129,10 +121,13 @@ useEffect(() => {
 
   const selectItem = (ingredient_type: string, item: {id: string, title: string | null} | null) => {
     if (item) {
-      handleChange(ingredient_type, item.title)
+      handleChange(ingredient_type, item.id)
       // console.log('viande', item);
     }
   }
+
+  if (isViandeLoading || isOeufsLoading || isLaitagesLoading || isLegumesLoading || isFeculentsLoading || isHuilesLoading) return <ActivityIndicator/>
+  if (viandeError || oeufError || laitageError || legumeError || feculentError || huileError) return <Text>Erreur</Text>
   return (
     <AutocompleteDropdownContextProvider>
 
@@ -141,6 +136,23 @@ useEffect(() => {
       style={styles.container}
       contentContainerStyle={{ alignItems: 'center', justifyContent: 'center', paddingVertical: 50}}
     >
+
+      <Text style={{color: 'white'}}>Titre</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Titre"
+        value={formData.title}
+        onChangeText={(text) => handleChange('title', text)}
+      />
+
+      <Text style={{color: 'white'}}>Description</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Description"
+        value={formData.comment}
+        onChangeText={(text) => handleChange('comment', text)}
+      />
+
       <Text style={{color: 'white'}}>Type de ration</Text>
       <Picker
         selectedValue={formData.type_r}
@@ -187,14 +199,7 @@ useEffect(() => {
         dataSet={showSuggestions ? viandes : null}
         onChangeText={(text) => {handleInputChange(text)}}
         inputContainerStyle={[styles.input, {position: 'relative'}]}
-        suggestionsListContainerStyle={{
-          position: 'absolute',
-          top: -90, // Adjust this based on the height of your input field
-          left: 0,
-          right: 0,
-          // height: '200px', // Set a maximum height for the suggestions list container
-          overflow: 'scroll',
-        }}
+
         showChevron={false}
       />
 
@@ -303,12 +308,12 @@ useEffect(() => {
         showChevron={false}
       />
 
-      {/* <View style={{ width: '100%', flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: '5%' }}>
+      <View style={{ width: '100%', flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: '5%' }}>
         <Link href={`/pets/${id}`} asChild>
           <Text style={styles.link}>Cancel</Text>
         </Link>
         <Button title="Submit" onPress={handleSubmit} />
-      </View> */}
+      </View>
     </ScrollView>
   </AutocompleteDropdownContextProvider>
   );
