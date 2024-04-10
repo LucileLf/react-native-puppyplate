@@ -196,14 +196,29 @@ export const useUpdateRationToNotCurrent = ( id: string | string[] ) =>  {
   })
 }
 
-  // fetch type_r
-  // fetch cm
-  // fetch mode
-
-
   // fetch Viandes, Oeufs, Laitages, Légumes, Féculents, Huiles
 export const useIngredientSubGroup = (subgroup: string) => {
-  const subgroups = ['viandes cuites', 'viandes crues', 'charcuteries et assimilés', 'autres produits à base de viande', 'poissons cuits', 'poissons crus', 'mollusques et crustacés cuits', 'mollusques et crustacés crus', 'produits à base de poissons et produits de la mer', 'substitus de produits carnés']
+  let subgroups: String[]
+    switch(subgroup) {
+      case 'viande':
+        subgroups = ['viandes cuites', 'viandes crues', 'charcuteries et assimilés', 'autres produits à base de viande', 'poissons cuits', 'poissons crus', 'mollusques et crustacés cuits', 'mollusques et crustacés crus', 'produits à base de poissons et produits de la mer', 'substitus de produits carnés']
+        break;
+      case 'oeuf':
+        subgroups = ['oeufs']
+        break;
+      case 'laitage':
+        subgroups = ['laits', 'produits laitiers frais et assimilés', 'fromages et assimilés', 'crèmes et spécialités à base de crème']
+        break;
+      case 'legume':
+        subgroups = ['légumes']
+        break;
+      case 'feculent':
+        subgroups = ['légumineuses', 'pommes de terre et autres tubercules', 'pâtes, riz et céréales']
+        break;
+      case 'huile':
+        subgroups = ['huiles et graisses végétales', 'huiles de poissons', 'autres matières grasses']
+        break;
+    }
   // console.log('looking for ingredients with ids', subgroup);
   return useQuery({
     queryKey: ['ingredients', subgroup],

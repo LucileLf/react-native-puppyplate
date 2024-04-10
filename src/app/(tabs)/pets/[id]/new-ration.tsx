@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, Button, Switch, StyleSheet, ScrollView, Image, Pressable, TouchableOpacity, ActivityIndicator, Platform, FlatList } from 'react-native';
 import { useIngredientSubGroup } from '@/api/rations';
 import { AutocompleteDropdownContextProvider, AutocompleteDropdown  } from 'react-native-autocomplete-dropdown';
+import { Picker } from '@react-native-picker/picker';
+import { supabase } from '@/lib/supabase';
 
 const AddPetRationForm = () => {
 
@@ -10,31 +12,78 @@ const AddPetRationForm = () => {
   const [inputValue, setInputValue] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
 
-  // fetch type_r
-  // fetch cm
-  // fetch mode
+  const [typeREnum, setTypeREnum] = useState([]);
+  const [cmvEnum, setCmvEnum] = useState([]);
+  const [modeEnum, setModeEnum] = useState([]);
+
   // fetch viande
   const {data: viandes, isLoading: isViandeLoading, error: viandeError} = useIngredientSubGroup('viande');
   console.log(`${viandes?.length} viandes`);
 
-  // const [selectedItem, setSelectedItem] = useState(null);
-
-  // const viandes = [
-  //   {
-  //     id: 'V01',
-  //     title: 'saumon'
-  //   },
-  //   {
-  //     id: 'V02',
-  //     title: 'chicken'
-  //   }
-  // ]
-
   // fetch Oeufs
+  const {data: oeufs, isLoading: isOeufsLoading, error: oeufError} = useIngredientSubGroup('oeuf');
+  console.log(`${oeufs?.length} oeufs`);
+
   // fetch Laitages
+  const {data: laitages, isLoading: isLaitagesLoading, error: laitageError} = useIngredientSubGroup('laitage');
+  console.log(`${laitages?.length} laitages`);
+
   // fetch Légumes
+  const {data: legumes, isLoading: isLegumesLoading, error: legumeError} = useIngredientSubGroup('legume');
+  console.log(`${legumes?.length} legumes`);
+
   // fetch Féculents
+  const {data: feculents, isLoading: isFeculentsLoading, error: feculentError} = useIngredientSubGroup('feculent');
+  console.log(`${feculents?.length} feculents`);
+
   // fetch Huiles
+  const {data: huiles, isLoading: isHuilesLoading, error: huileError} = useIngredientSubGroup('huile');
+  console.log(`${huiles?.length} huiles`);
+
+
+
+useEffect(() => {
+  // fetch type_r
+  async function fetchTypeREnum() {
+    try {
+      let { data, error } = await supabase.rpc('get_enum_values_for_types_r');
+      if (error) throw error;
+
+      // Storing the result in the component state
+      setTypeREnum(data);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+  // fetch cmv
+  async function fetchCmvEnum() {
+    try {
+      let { data, error } = await supabase.rpc('get_enum_values_for_cmv');
+      if (error) throw error;
+
+      // Storing the result in the component state
+      setCmvEnum(data);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+  // fetch mode
+  async function fetchModeEnum() {
+    try {
+      let { data, error } = await supabase.rpc('get_enum_values_for_cmv');
+      if (error) throw error;
+
+      // Storing the result in the component state
+      setModeEnum(data);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  fetchTypeREnum();
+  fetchCmvEnum();
+  fetchModeEnum();
+}, []);
 
 
   const [formData, setFormData] = useState({
@@ -44,8 +93,8 @@ const AddPetRationForm = () => {
     viande: '',
     oeuf: '',
     laitage: '',
-    légume: '',
-    féculent: '',
+    legume: '',
+    feculent: '',
     huile: '',
   });
 
@@ -78,9 +127,9 @@ const AddPetRationForm = () => {
     setShowSuggestions(text.length >= 3);
   };
 
-  const selectItem = (item: {id: string, title: string} | null) => {
+  const selectItem = (ingredient_type: string, item: {id: string, title: string | null} | null) => {
     if (item) {
-      handleChange('viande', item.title)
+      handleChange(ingredient_type, item.title)
       // console.log('viande', item);
     }
   }
@@ -93,97 +142,165 @@ const AddPetRationForm = () => {
       contentContainerStyle={{ alignItems: 'center', justifyContent: 'center', paddingVertical: 50}}
     >
       <Text style={{color: 'white'}}>Type de ration</Text>
-      <TextInput
+      <Picker
+        selectedValue={formData.type_r}
         style={styles.input}
-        placeholder="Sélectionner..."
-        value={formData.type_r}
-        onChangeText={(text) => handleChange('type_r', text)}
-      />
+        onValueChange={(itemValue) => handleChange('type_r', itemValue)}
+      >
+        {typeREnum?.map((type) => (
+          <Picker.Item key={type} label={type} value={type} />
+        ))}
+      </Picker>
+      {/* <Text style={{color: 'white'}}>{formData.type_r}</Text> */}
 
       <Text style={{color: 'white'}}>CMV</Text>
-      <TextInput
+      <Picker
+        selectedValue={formData.cmv}
         style={styles.input}
-        placeholder="Sélectionner..."
-        value={formData.cmv}
-        onChangeText={(text) => handleChange('cmv', text)}
-      />
+        onValueChange={(itemValue) => handleChange('cmv', itemValue)}
+      >
+        {cmvEnum?.map((cmv) => (
+          <Picker.Item key={cmv} label={cmv} value={cmv} />
+        ))}
+      </Picker>
+      {/* <Text style={{color: 'white'}}>{formData.cmv}</Text> */}
 
       <Text style={{color: 'white'}}>Mode de ration</Text>
-      <TextInput
+      <Picker
+        selectedValue={formData.mode}
         style={styles.input}
-        placeholder="Sélectionner..."
-        value={formData.mode}
-        onChangeText={(text) => handleChange('mode', text)}
-      />
+        onValueChange={(itemValue) => handleChange('mode', itemValue)}
+      >
+        {modeEnum?.map((mode) => (
+          <Picker.Item key={mode} label={mode} value={mode} />
+        ))}
+      </Picker>
+      {/* <Text style={{color: 'white'}}>{formData.mode}</Text> */}
 
       <Text style={{color: 'white'}}>Viande</Text>
-
       <AutocompleteDropdown
         clearOnFocus={false}
         closeOnBlur={true}
         closeOnSubmit={false}
         initialValue={formData.viande}
-        onSelectItem={(item) => selectItem(item)}
+        onSelectItem={(item) => selectItem('viande', item)}
         dataSet={showSuggestions ? viandes : null}
         onChangeText={(text) => {handleInputChange(text)}}
-
-        // dataSet={viandes}
         inputContainerStyle={[styles.input, {position: 'relative'}]}
         suggestionsListContainerStyle={{
-          // position: 'absolute',
+          position: 'absolute',
           top: -90, // Adjust this based on the height of your input field
           left: 0,
           right: 0,
+          // height: '200px', // Set a maximum height for the suggestions list container
+          overflow: 'scroll',
         }}
         showChevron={false}
       />
 
-      <Text style={{color: 'white'}}>{formData.viande}</Text>
-      {/* <TextInput
-        style={styles.input}
-        placeholder="Sélectionner..."
-        value={formData.viande}
-        onChangeText={(text) => handleChange('viande', text)}
-      /> */}
-
       <Text style={{color: 'white'}}>Oeuf</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Sélectionner..."
-        value={formData.oeuf}
-        onChangeText={(text) => handleChange('oeuf', text)}
+      <AutocompleteDropdown
+        clearOnFocus={false}
+        closeOnBlur={true}
+        closeOnSubmit={false}
+        initialValue={formData.oeuf}
+        onSelectItem={(item) => selectItem('oeuf', item)}
+        dataSet={showSuggestions ? oeufs : null}
+        onChangeText={(text) => {handleInputChange(text)}}
+        inputContainerStyle={[styles.input, {position: 'relative'}]}
+        suggestionsListContainerStyle={{
+          position: 'absolute',
+          top: -90, // Adjust this based on the height of your input field
+          left: 0,
+          right: 0,
+          // height: '200px', // Set a maximum height for the suggestions list container
+          overflow: 'scroll',
+        }}
+        showChevron={false}
       />
 
       <Text style={{color: 'white'}}>Laitage</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Sélectionner..."
-        value={formData.laitage}
-        onChangeText={(text) => handleChange('laitage', text)}
+      <AutocompleteDropdown
+        clearOnFocus={false}
+        closeOnBlur={true}
+        closeOnSubmit={false}
+        initialValue={formData.laitage}
+        onSelectItem={(item) => selectItem('laitage', item)}
+        dataSet={showSuggestions ? laitages : null}
+        onChangeText={(text) => {handleInputChange(text)}}
+        inputContainerStyle={[styles.input, {position: 'relative'}]}
+        suggestionsListContainerStyle={{
+          position: 'absolute',
+          top: -90, // Adjust this based on the height of your input field
+          left: 0,
+          right: 0,
+          // height: '200px', // Set a maximum height for the suggestions list container
+          overflow: 'scroll',
+        }}
+        showChevron={false}
       />
 
       <Text style={{color: 'white'}}>Légume</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Sélectionner..."
-        value={formData.légume}
-        onChangeText={(text) => handleChange('légume', text)}
+      <AutocompleteDropdown
+        clearOnFocus={false}
+        closeOnBlur={true}
+        closeOnSubmit={false}
+        initialValue={formData.legume}
+        onSelectItem={(item) => selectItem('legume', item)}
+        dataSet={showSuggestions ? legumes : null}
+        onChangeText={(text) => {handleInputChange(text)}}
+        inputContainerStyle={[styles.input, {position: 'relative'}]}
+        suggestionsListContainerStyle={{
+          position: 'absolute',
+          top: -90, // Adjust this based on the height of your input field
+          left: 0,
+          right: 0,
+          // height: '200px', // Set a maximum height for the suggestions list container
+          overflow: 'scroll',
+        }}
+        showChevron={false}
       />
 
       <Text style={{color: 'white'}}>Féculent</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Sélectionner..."
-        value={formData.féculent}
-        onChangeText={(text) => handleChange('féculent', text)}
+      <AutocompleteDropdown
+        clearOnFocus={false}
+        closeOnBlur={true}
+        closeOnSubmit={false}
+        initialValue={formData.feculent}
+        onSelectItem={(item) => selectItem('feculent', item)}
+        dataSet={showSuggestions ? feculents : null}
+        onChangeText={(text) => {handleInputChange(text)}}
+        inputContainerStyle={[styles.input, {position: 'relative'}]}
+        suggestionsListContainerStyle={{
+          position: 'absolute',
+          top: -90, // Adjust this based on the height of your input field
+          left: 0,
+          right: 0,
+          // height: '200px', // Set a maximum height for the suggestions list container
+          overflow: 'scroll',
+        }}
+        showChevron={false}
       />
 
       <Text style={{color: 'white'}}>Huile</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Sélectionner..."
-        value={formData.huile}
-        onChangeText={(text) => handleChange('huile', text)}
+      <AutocompleteDropdown
+        clearOnFocus={false}
+        closeOnBlur={true}
+        closeOnSubmit={false}
+        initialValue={formData.huile}
+        onSelectItem={(item) => selectItem('huile', item)}
+        dataSet={showSuggestions ? huiles : null}
+        onChangeText={(text) => {handleInputChange(text)}}
+        inputContainerStyle={[styles.input, {position: 'relative'}]}
+        suggestionsListContainerStyle={{
+          position: 'absolute',
+          top: -90, // Adjust this based on the height of your input field
+          left: 0,
+          right: 0,
+          // height: '200px', // Set a maximum height for the suggestions list container
+          overflow: 'scroll',
+        }}
+        showChevron={false}
       />
 
       {/* <View style={{ width: '100%', flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: '5%' }}>
