@@ -14,7 +14,7 @@ export const PetCard = ({ pet }: PetCardProps) => {
   // console.log('pet iamge', pet.image);
 // const imageName = pet.image
   return (
-    <Link href={`/pets/${pet.id}`} asChild>
+    <Link href={`/pets/${pet.id}` as any} asChild>
       <Pressable style={styles.container}>
         <Text>{pet.name}</Text>
         <Image

@@ -36,7 +36,10 @@ const AddPetWeightForm = () => {
   }
 
     const resetFields = () => {
-      // TO DO
+      setFormData({
+        weight: 0,
+        measurement_date: new Date()
+      });
     }
 
   const handleChange = (key: any, value: any) => {
@@ -93,7 +96,7 @@ const AddPetWeightForm = () => {
       )}
 
       <View style={{ width: '100%', flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: '5%' }}>
-        <Link href={`/pets/${id}`} asChild>
+        <Link href={`/pets/${id}` as any} asChild>
           <Text style={styles.link}>Cancel</Text>
         </Link>
         <Button title="Submit" onPress={handleSubmit} />

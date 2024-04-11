@@ -69,16 +69,16 @@ export const useRation = (id: string | string[]) => {
   });
 };
 
-export const useRationIngredients = (id: string | string[]) => {
-  console.log('looking for ingredients with ration_id', id);
+export const useRationIngredients = (rationId: string | string[]) => {
+  console.log('looking for ingredients with ration_id', rationId);
   return useQuery({
-    queryKey: ['ration_ingredients', id],
+    queryKey: ['ration_ingredients', rationId],
 
     queryFn: async () => {
       const { data, error } = await supabase
         .from('ration_ingredients')
         .select('*')
-        .eq('ration_id', id)
+        .eq('ration_id', rationId)
       if (error) {
         throw new Error(error.message);
       }
@@ -240,7 +240,7 @@ export const useIngredientSubGroup = (subgroup: string) => {
   });
 };
 
-// CREATE RATION
+// CREATE RATION (NO NUTRITION INFO)
 export const useInsertPetRation = () =>  {
   const queryClient = useQueryClient();
   return useMutation({
@@ -256,15 +256,14 @@ export const useInsertPetRation = () =>  {
       })
       .select()
       .single()
-      console.log('newWeight inserted', newRation);
+      console.log('new pet ration inserted', newRation);
       console.log('error', error);
 
       if (error) {
-        console.log('error from insertpetweight', error);
-
+        console.log('error from insertpetration', error);
         throw new Error(error.message);
       }
-      console.log('inserted weight', newRation );
+      console.log('inserted ration', newRation );
 
       return newRation;
     },
@@ -273,7 +272,41 @@ export const useInsertPetRation = () =>  {
       // invalidate the query cache for the 'Pets' key --> query get executed again
       console.log("newRation after success", newRation);
       console.log("ration inserted");
-        queryClient.invalidateQueries({queryKey: ['rations', newRation.pet_id]});
+      queryClient.invalidateQueries({queryKey: ['rations', newRation.pet_id]});
+    }
+  })
+}
+
+// INSERT RATION INGREDIENT
+export const useInsertRationIngredient = () =>  {
+  const queryClient = useQueryClient();
+  return useMutation({
+    async mutationFn({rationId, ingredientId}: any) {
+      console.log(`inserting ingredient ${ingredientId} to ration ${rationId}`, )
+      const { error, data: newRationIngredient } = await supabase.from('ration_ingredients').insert({
+        ration_id: rationId,
+        ingredient_id: ingredientId
+      })
+      .select()
+      .single()
+      console.log('newWeight inserted', newRationIngredient);
+      console.log('error', error);
+
+      if (error) {
+        console.log('error from insertpetweight', error);
+
+        throw new Error(error.message);
+      }
+      console.log('inserted weight', newRationIngredient );
+
+      return newRationIngredient;
+    },
+    onSuccess: (newRationIngredient) => {
+      //console.log('data after success', newPet);
+      // invalidate the query cache for the 'Pets' key --> query get executed again
+      console.log("newRationIngredient after success", newRationIngredient);
+      console.log("ration ingredient inserted");
+        queryClient.invalidateQueries({queryKey: ['ration_ingredients', newRationIngredient.ration_id]});
     },
     //invalidate the query cache for the 'Pets' key --> query get executed again
     // async onSuccess() {

@@ -21,7 +21,7 @@ export const RationListItem = ({ ration }: RationListItemProps) => {
     <>
       <Text style={{color: 'green', fontWeight: "500"}}>{ration.current && "Ration actuelle"}</Text>
       <View style={styles.rationContainer}>
-        <Link href={`/rations/${ration.id}`} asChild>
+        <Link href={`/rations/${ration.id}` as any} asChild>
           <Pressable style={styles.rationContainer}>
             <Image
               source={rationPicture}

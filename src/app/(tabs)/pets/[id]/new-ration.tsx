@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, Button, Switch, StyleSheet, ScrollView, Image, Pressable, TouchableOpacity, ActivityIndicator, Platform, FlatList } from 'react-native';
-import { useIngredientSubGroup, useInsertPetRation } from '@/api/rations';
+import { useIngredientSubGroup, useInsertPetRation, useInsertRationIngredient } from '@/api/rations';
 import { AutocompleteDropdownContextProvider, AutocompleteDropdown  } from 'react-native-autocomplete-dropdown';
 import { Picker } from '@react-native-picker/picker';
 import { supabase } from '@/lib/supabase';
@@ -25,16 +25,18 @@ const AddPetRationForm = () => {
   const {data: feculents, isLoading: isFeculentsLoading, error: feculentError} = useIngredientSubGroup('feculent');
   const {data: huiles, isLoading: isHuilesLoading, error: huileError} = useIngredientSubGroup('huile');
   const {mutate: insertPetRation, error: insertPetRationError} = useInsertPetRation(); // hook returns a function
+  const {mutate: insertRationIngredient, error: insertRationIngredientError} = useInsertRationIngredient(); // hook returns a function
 
   useEffect(() => {
     // fetch type_r
     async function fetchTypeREnum() {
       try {
-        let { data, error } = await supabase.rpc('get_enum_values_for_types_r');
+        let { data: types_enum, error } = await supabase.rpc('get_enum_values_for_types_r');
         if (error) throw error;
+        console.log('types_enum', types_enum);
 
         // Storing the result in the component state
-        setTypeREnum(data);
+        setTypeREnum(types_enum);
       } catch (error) {
         console.error(error);
       }
@@ -42,11 +44,12 @@ const AddPetRationForm = () => {
     // fetch cmv
     async function fetchCmvEnum() {
       try {
-        let { data, error } = await supabase.rpc('get_enum_values_for_cmv');
+        let { data: cmv_enum, error } = await supabase.rpc('get_enum_values_for_cmv');
         if (error) throw error;
+        console.log('cmv_enum', cmv_enum);
 
         // Storing the result in the component state
-        setCmvEnum(data);
+        setCmvEnum(cmv_enum);
       } catch (error) {
         console.error(error);
       }
@@ -54,11 +57,12 @@ const AddPetRationForm = () => {
     // fetch mode
     async function fetchModeEnum() {
       try {
-        let { data, error } = await supabase.rpc('get_enum_values_for_cmv');
+        let { data: modes_enum, error } = await supabase.rpc('get_enum_values_for_modes');
         if (error) throw error;
+        console.log('modes_enum', modes_enum);
 
         // Storing the result in the component state
-        setModeEnum(data);
+        setModeEnum(modes_enum);
       } catch (error) {
         console.error(error);
       }
@@ -68,7 +72,6 @@ const AddPetRationForm = () => {
     fetchCmvEnum();
     fetchModeEnum();
   }, []);
-
 
   const [formData, setFormData] = useState({
     title: '',
@@ -84,30 +87,133 @@ const AddPetRationForm = () => {
     huile: '',
   });
 
-
-
   const handleSubmit = async (event: any) => {
     event.preventDefault();
     console.log('submitting Form data:', formData);
     // insert ration
     // insertPetRation(petId, formData)
-    try{
-      insertPetRation({
-        petId: Array.isArray(petId) ? petId[0] : petId,
-        data: formData
-      })
-      resetFields();
-      router.back()
-    }  catch (error) {
-      console.log('insertPetRation', insertPetRation)
-    }
+    insertPetRation(
+      {petId: Array.isArray(petId) ? petId[0] : petId, data: formData},
+      {
+        onSuccess: (newRation: any) => {
+          console.log('ration inserted successfully', newRation);
+          // insert ration ingredients (without quantity)
 
-    // insert ration ingredients
-    // calculate nutrition value
+          insertRationIngredient({
+
+            rationId: newRation.id,
+            ingredientId: formData.viande
+          })
+            // oeuf
+          insertRationIngredient({
+            rationId: newRation.id,
+            ingredientId: formData.oeuf
+          })
+
+            // laitage
+          insertRationIngredient({
+            rationId: newRation.id,
+            ingredientId: formData.laitage
+          })
+
+            // legume
+          insertRationIngredient({
+            rationId: newRation.id,
+            ingredientId: formData.legume
+          })
+
+            // feculent
+          insertRationIngredient({
+            rationId: newRation.id,
+            ingredientId: formData.feculent
+          })
+
+            // huile
+          insertRationIngredient({
+            rationId: newRation.id,
+            ingredientId: formData.huile
+          })
+
+          // calculate quantité?
+          resetFields();
+              router.back()
+        },
+        onError: (error) => {
+          console.error('Error inserting new ration:', error);
+          // Handle any error here
+        },
+      }
+    )
   }
+    // try{
+    //   const newRation = await insertPetRation({
+    //     petId: Array.isArray(petId) ? petId[0] : petId,
+    //     data: formData
+    //   })
+    //   console.log('ration inserted successfully', newRation);
+
+    //   // calculate quantité?
+    //   // insert ration ingredients (without quantity)
+    //   // viande
+
+    //   insertRationIngredient({
+
+    //     rationId: newRation.id,
+    //     ingredientId: formData.viande
+    //   })
+    //     // oeuf
+    //   insertRationIngredient({
+    //     rationId: newRation.id,
+    //     ingredientId: formData.oeuf
+    //   })
+
+    //     // laitage
+    //   insertRationIngredient({
+    //     rationId: newRation.id,
+    //     ingredientId: formData.laitage
+    //   })
+
+    //     // legume
+    //   insertRationIngredient({
+    //     rationId: newRation.id,
+    //     ingredientId: formData.legume
+    //   })
+
+    //     // feculent
+    //   insertRationIngredient({
+    //     rationId: newRation.id,
+    //     ingredientId: formData.feculent
+    //   })
+
+    //     // huile
+    //   insertRationIngredient({
+    //     rationId: newRation.id,
+    //     ingredientId: formData.huile
+    //   })
+
+    //   // calculate nutrition value:
+    //     // const nutri_info = calculate_nutri_info()
+    //     // console.log(nutri_info)
+    //     // insertNutritionalIngo to ration(pet_nutri_info)
+    //   }  catch (error) {
+    //     console.log('insertPetRation', insertPetRation)
+    //   }
+
 
   const resetFields = () => {
-    // TO DO
+    setFormData({
+      title: '',
+      comment: '',
+      type_r: 'PRO BARF (sans amidon)',
+      cmv: "Vit'i5 Orange (pot 600g)",
+      mode: '100% ration ménagère',
+      viande: '',
+      oeuf: '',
+      laitage: '',
+      legume: '',
+      feculent: '',
+      huile: '',
+    })
   }
 
   const handleChange = (ingredient_type: string, id: string) => {
@@ -309,7 +415,7 @@ const AddPetRationForm = () => {
       />
 
       <View style={{ width: '100%', flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: '5%' }}>
-        <Link href={`/pets/${id}`} asChild>
+        <Link href={`/pets/${id}` as any} asChild>
           <Text style={styles.link}>Cancel</Text>
         </Link>
         <Button title="Submit" onPress={handleSubmit} />
@@ -317,8 +423,8 @@ const AddPetRationForm = () => {
     </ScrollView>
   </AutocompleteDropdownContextProvider>
   );
+}
 
-};
 
 const styles = StyleSheet.create({
   container: {

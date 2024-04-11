@@ -71,51 +71,31 @@ const AddPetForm = () => {
 
     // insert pet
     try{
-    const newPet = await insertPet({
-      user_id: session?.user.id,
-      petData: formData,
-      // onSuccess: () => {
-    })
-    console.log('Pet inserted successfully:', newPet);
+      const newPet = await insertPet({
+        user_id: session?.user.id,
+        petData: formData,
+        // onSuccess: () => {
+      })
+      console.log('Pet inserted successfully:', newPet);
 
-    // insert pet nutritional needs
-    const nutri_needs = calculate_nutri_needs()
-    console.log(nutri_needs)
-    const pet_nutri_needs = {...nutri_needs, pet_id: newPet.id}
-    insertNutritionalNeeds(pet_nutri_needs)
+      // insert pet nutritional needs
+      const nutri_needs = calculate_nutri_needs()
+      console.log(nutri_needs)
+      const pet_nutri_needs = {...nutri_needs, pet_id: newPet.id}
+      insertNutritionalNeeds(pet_nutri_needs)
 
-    // insert current weight
-    //const current_weight = {pet_id: newPet.id, weight: newPet.weight, measurement_date: newPet.created_on}
-    insertInitialPetWeight(newPet)
-    console.log("insertWeightError", insertWeightError);
+      // insert current weight
+      //const current_weight = {pet_id: newPet.id, weight: newPet.weight, measurement_date: newPet.created_on}
+      insertInitialPetWeight(newPet)
+      console.log("insertWeightError", insertWeightError);
 
-
-  }catch (error) {
-    console.error('Error inserting pet:', error);
-    // Handle errors, e.g., show an error message
-  }
-// console.log('isSuccess', isSuccess);
-// console.log('insertPetError', insertPetError);
-// console.log('newPet', newPet);
-
-
-// console.log("newPet from sumit", newPet);
-
-    //console.log("data from handlesubmit", newPet)
-// console.log("newPet from handlesubmit", returned);
-
-
-
-        // console.log(pet_nutri_needs)
-        // insertNutritionalNeeds(pet_nutri_needs);
-
-
-
+    } catch (error) {
+      console.error('Error inserting pet:', error);
+      // Handle errors, e.g., show an error message
+    }
         resetFields(); // definition
         router.back()
-
-    }
-
+  }
 
   const handleChange = (key: any, value: any) => {
     setFormData({ ...formData, [key]: value });
@@ -123,6 +103,19 @@ const AddPetForm = () => {
 
   const resetFields = () => {
     // TO DO
+    setFormData({
+      name: '',
+      image: '',
+      breed: {"breed": "Akita Américain", "id": "b1"},
+      weight: 0.00,
+      ideal_weight: 0.00,
+      activity: {"activityLevel": "Normal", "id": "a1"},
+      life_stage: {"lifeStage": "Adulte (2 à 7 ans)", "id": "s2"},
+      sterilized: false,
+      lieu_de_vie: {"environment": "Intérieur", "id": "e1"},
+      quantite_legumes: {"vegQuantity": "Normale", "id": "v1"},
+      sexe: 'F',
+    });
   }
 
   const calculate_bmr = (rer: number) => {

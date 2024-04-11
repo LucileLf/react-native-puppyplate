@@ -116,7 +116,7 @@ export const PetDetails = ({ pet }: PetDetailsProps) => {
               <ChartComponent weightData={weightsData} idealWeight={pet.ideal_weight} />
             </View>
           }
-          <Link href={`/pets/${pet.id}/new-weight`} asChild>
+          <Link href={`/pets/${pet.id}/new-weight` as any} asChild>
             <AddButton text={`Enregistrer un poids pour ${pet.name}`}/>
           </Link>
         </View>
@@ -139,7 +139,7 @@ export const PetDetails = ({ pet }: PetDetailsProps) => {
           {rationsData &&
             rationsData.map((ration)=> <RationListItem key={ration.id} ration={ration}/>)
           }
-        <Link href={`/pets/${pet.id}/new-ration`} asChild>
+        <Link href={`/pets/${pet.id}/new-ration` as any} asChild>
           <AddButton text={`Ajouter une recette pour ${pet.name}`}/>
         </Link>
         </View>

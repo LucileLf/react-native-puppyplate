@@ -281,8 +281,6 @@ export const usePetWeights = (petId: string, { enabled = true }) => {
   });
 }
 
-
-
 // CREATE PET
 export const useInsertPet = () =>  {
   const queryClient = useQueryClient();
@@ -316,15 +314,10 @@ export const useInsertPet = () =>  {
     onSuccess: () => {
       //console.log('data after success', newPet);
       // invalidate the query cache for the 'Pets' key --> query get executed again
-
       console.log("pet inserted");
-        queryClient.invalidateQueries({queryKey: ['pets']});
-
-
+      queryClient.invalidateQueries({queryKey: ['pets']});
     },
-
       // console.log('new pet from insertpet hook', newPet);
-
   },
 )}
 

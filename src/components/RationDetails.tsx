@@ -26,13 +26,13 @@ export const RationDetails = ({ ration }: RationDetailsProps) => {
         <Stack.Screen options={{ title: ration.title}} />
         <Text style={{color: 'white', fontStyle: 'italic'}}>{ration.comment}</Text>
         <View style={styles.container}>
-          <Text>{ration.protein}</Text>
-          <Text>{ration.fat}</Text>
-          <Text>{ration.carb}</Text>
-          <Text>{ration.cendre}</Text>
-          <Text>{ration.fiber}</Text>
-          <Text>{ration.calcium}</Text>
-          <Text>{ration.potassium}</Text>
+          <Text>{ration.protein} protein</Text>
+          <Text>{ration.fat} fat</Text>
+          <Text>{ration.carb} carb</Text>
+          <Text>{ration.cendre} cendre</Text>
+          <Text>{ration.fiber} fiber</Text>
+          <Text>{ration.calcium} calcium</Text>
+          <Text>{ration.potassium} potassium</Text>
           <Text>Pourcentage de nutrition e l'animal</Text>
           <NutritionalTable nutritionalNeeds={
             {
