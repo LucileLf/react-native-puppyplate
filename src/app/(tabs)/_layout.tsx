@@ -3,9 +3,11 @@ import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { Link, Tabs } from 'expo-router';
 import { Pressable } from 'react-native';
 
-import Colors from '@/constants/Colors';
+import palette from '@/constants/Colors';
 import { useColorScheme } from '@/components/useColorScheme';
 import { useClientOnlyValue } from '@/components/useClientOnlyValue';
+import { colors } from 'react-native-elements';
+import { useTheme } from '@react-navigation/native';
 
 // You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
 function TabBarIcon(props: {
@@ -18,18 +20,49 @@ function TabBarIcon(props: {
 export default function TabLayout() {
   const colorScheme = useColorScheme();
 
+  const {colors} = useTheme();
+  console.log('colors', colors)
+
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        // Disable the static render of the header on web
-        // to prevent a hydration error in React Navigation v6.
+        tabBarActiveTintColor: colors.selectedIcon,
+        tabBarInactiveTintColor: colors.icon,
         headerShown: useClientOnlyValue(false, true),
-      }}>
+        tabBarStyle: {
+          backgroundColor: colors.card,
+          borderColor: colors.background
+          // Set your desired background color here
+          // Additional styles can be added here if needed
+        },
+        headerStyle: {
+          backgroundColor: colors.background,
+        },
+        headerShadowVisible: false,
+        headerTintColor: colors.buttonText, // Color of the header title and buttons
+        headerTitleStyle: {
+          fontWeight: 'bold', // Example for setting font weight of the title
+        }
+      }}
+    >
 
       <Tabs.Screen
         name="index"
-        options={{href: null, headerShown: false}} //hide from bottom tab
+        options={{
+          href: null,
+          headerShown: false,
+          tabBarIcon: ({ focused, color }) => (
+            <TabBarIcon name="home" color={color} />
+          )
+
+        }}
+      />
+      <Tabs.Screen
+        name="rations"
+        options={{
+          href: null,
+          headerShown: false
+        }}
       />
 
       <Tabs.Screen
@@ -37,37 +70,19 @@ export default function TabLayout() {
         options={{
           title: 'Mes animaux',
           headerShown: false,
-          tabBarIcon: ({ color }) => <TabBarIcon name="paw" color={color} />,
-          headerRight: () => (
-            <Link href="/modal" asChild>
-              <Pressable>
-                {({ pressed }) => (
-                  <FontAwesome
-                    name="info-circle"
-                    size={25}
-                    color={Colors[colorScheme ?? 'light'].text}
-                    style={{ marginRight: 15, opacity: pressed ? 0.5 : 1 }}
-                  />
-                )}
-              </Pressable>
-            </Link>
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="rations"
-        options={{
-          title: 'Mes recettes',
-          headerShown: false,
-          tabBarIcon: ({ color }) => <TabBarIcon name='cutlery' color={color} />,
+          tabBarIcon: ({ focused, color }) => (
+            <TabBarIcon name="paw" color={color} />
+          )
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
-          title: 'Profil',
-          headerShown: false,
-          tabBarIcon: ({ color }) => <TabBarIcon name='user' color={color} />,
+          title: 'Mon profil',
+          // headerShown: false,
+          tabBarIcon: ({ focused, color }) => (
+            <TabBarIcon name='user' color={color} />
+          )
         }}
       />
     </Tabs>

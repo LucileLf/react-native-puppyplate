@@ -236,7 +236,7 @@ export const useVeg = (id: string, { enabled = true }) => {
 }
 
 // READ NUTRITIONAL NEEDS
-export const usePetNutritionalNeeds = (pet_id: string, { enabled = true }) => {
+export const usePetNutritionalNeeds = (pet_id: string | string[], { enabled = true }) => {
   console.log('api looking from nutritional needs with pet_id', pet_id);
   return useQuery({
     queryKey: ['nutritional_needs', pet_id],

@@ -5,6 +5,8 @@ import { AutocompleteDropdownContextProvider, AutocompleteDropdown  } from 'reac
 import { Picker } from '@react-native-picker/picker';
 import { supabase } from '@/lib/supabase';
 import { Link, useLocalSearchParams, useRouter } from 'expo-router';
+import { usePetNutritionalNeeds } from '@/api/pets';
+// import { usePet, usePetNutritionalNeeds } from '@/api/pets';
 
 const AddPetRationForm = () => {
 
@@ -26,6 +28,9 @@ const AddPetRationForm = () => {
   const {data: huiles, isLoading: isHuilesLoading, error: huileError} = useIngredientSubGroup('huile');
   const {mutate: insertPetRation, error: insertPetRationError} = useInsertPetRation(); // hook returns a function
   const {mutate: insertRationIngredient, error: insertRationIngredientError} = useInsertRationIngredient(); // hook returns a function
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const {data: nutritionalNeeds, isLoading: isNutritionalNeedsLoading, error: nutritionalNeedsError} = usePetNutritionalNeeds(petId, {enabled: true});
 
   useEffect(() => {
     // fetch type_r
@@ -73,7 +78,7 @@ const AddPetRationForm = () => {
     fetchModeEnum();
   }, []);
 
-  const [formData, setFormData] = useState({
+  const initialState = {
     title: '',
     comment: '',
     type_r: 'PRO BARF (sans amidon)',
@@ -85,139 +90,153 @@ const AddPetRationForm = () => {
     legume: '',
     feculent: '',
     huile: '',
-  });
+    objective: 1,
+  }
 
+  const [formData, setFormData] = useState(initialState);
+
+  const calculate_quantity = (ingredientId: string) => {
+    // TO DO
+    //fetch ingredient from id
+
+    return 7;
+    // need to gget ingredient info
+  }
   const handleSubmit = async (event: any) => {
     event.preventDefault();
+    setIsSubmitting(true);
     console.log('submitting Form data:', formData);
-    // insert ration
-    // insertPetRation(petId, formData)
-    insertPetRation(
-      {petId: Array.isArray(petId) ? petId[0] : petId, data: formData},
-      {
-        onSuccess: (newRation: any) => {
-          console.log('ration inserted successfully', newRation);
-          // insert ration ingredients (without quantity)
 
-          insertRationIngredient({
+    //CALCULATE NUTRITION GOAL OF OVERALL RATION BASED ON OBJ
+    // if (nutritionalNeeds) {
+    const nutritionGoal = {...nutritionalNeeds,
+        calories: 1/formData.objective * nutritionalNeeds.calories,
+        // rpc: 1/formData.objective * nutritionalNeeds.rpc,  // rpc stays the same
+        calcium: 1/formData.objective * nutritionalNeeds.calcium
+      }
+      //pet.veg_quantity
+      console.log('nutritionGoal', nutritionGoal);
+    // }
 
-            rationId: newRation.id,
-            ingredientId: formData.viande
-          })
-            // oeuf
-          insertRationIngredient({
-            rationId: newRation.id,
-            ingredientId: formData.oeuf
-          })
+    //mode
+    //type_r
 
-            // laitage
-          insertRationIngredient({
-            rationId: newRation.id,
-            ingredientId: formData.laitage
-          })
+    try {
+      const quantities = await Promise.all([
+        // Assuming calculate_quantity is an async function and returns a quantity
+        calculate_quantity(formData.viande),
+        calculate_quantity(formData.oeuf),
+        calculate_quantity(formData.laitage),
+        calculate_quantity(formData.legume),
+        calculate_quantity(formData.feculent),
+        calculate_quantity(formData.huile),
+      ]);
 
-            // legume
-          insertRationIngredient({
-            rationId: newRation.id,
-            ingredientId: formData.legume
-          })
+      // Construct an array of ration ingredients with quantities
+      const rationIngredients = [
+        { ingredientId: formData.viande, quantity: quantities[0] },// id, title , quté
+        { ingredientId: formData.oeuf, quantity: quantities[1] },
+        { ingredientId: formData.laitage, quantity: quantities[2] },
+        { ingredientId: formData.legume, quantity: quantities[3] },
+        { ingredientId: formData.feculent, quantity: quantities[4] },
+        { ingredientId: formData.huile, quantity: quantities[5] },
+      ];
 
-            // feculent
-          insertRationIngredient({
-            rationId: newRation.id,
-            ingredientId: formData.feculent
-          })
+      // Insert the main ration first
+      insertPetRation({
+        petId: Array.isArray(petId) ? petId[0] : petId,
+        data: formData
+        //add nutrition info based on objective?? - quantities will depend on it
+      }, {
+        onSuccess: async (newRation) => {
+          console.log('Ration inserted successfully', newRation);
 
-            // huile
-          insertRationIngredient({
-            rationId: newRation.id,
-            ingredientId: formData.huile
-          })
+          // Insert all ration ingredients with calculated quantities
+          for (const { ingredientId, quantity } of rationIngredients) {
+            if (ingredientId && quantity) { // Ensure there's an ID and a calculated quantity
+              await insertRationIngredient({
+                rationId: newRation.id,
+                ingredientId: ingredientId,
+                quantity: quantity // change API to supports a 'quantity' field
+              });
+            }
+          }
 
-          // calculate quantité?
+          console.log('All ration ingredients inserted successfully');
           resetFields();
-              router.back()
+          router.back();
         },
         onError: (error) => {
           console.error('Error inserting new ration:', error);
-          // Handle any error here
+          setIsSubmitting(false); // Submission failed, hide activity indicator
         },
-      }
-    )
+      });
+    } catch (error) {
+      console.error('Error calculating quantities:', error);
+      setIsSubmitting(false); // Error occurred, hide activity indicator
+    }
   }
-    // try{
-    //   const newRation = await insertPetRation({
-    //     petId: Array.isArray(petId) ? petId[0] : petId,
-    //     data: formData
-    //   })
-    //   console.log('ration inserted successfully', newRation);
 
-    //   // calculate quantité?
-    //   // insert ration ingredients (without quantity)
-    //   // viande
+    // insertPetRation(
+    //   {petId: Array.isArray(petId) ? petId[0] : petId, data: formData},
+    //   {
+    //     onSuccess: (newRation: any) => {
+    //       console.log('ration inserted successfully', newRation);
+    //       // insert ration ingredients (without quantity)
 
-    //   insertRationIngredient({
+    //       insertRationIngredient({
 
-    //     rationId: newRation.id,
-    //     ingredientId: formData.viande
-    //   })
-    //     // oeuf
-    //   insertRationIngredient({
-    //     rationId: newRation.id,
-    //     ingredientId: formData.oeuf
-    //   })
+    //         rationId: newRation.id,
+    //         ingredientId: formData.viande
+    //       })
+    //         // oeuf
+    //       insertRationIngredient({
+    //         rationId: newRation.id,
+    //         ingredientId: formData.oeuf
+    //       })
 
-    //     // laitage
-    //   insertRationIngredient({
-    //     rationId: newRation.id,
-    //     ingredientId: formData.laitage
-    //   })
+    //         // laitage
+    //       insertRationIngredient({
+    //         rationId: newRation.id,
+    //         ingredientId: formData.laitage
+    //       })
 
-    //     // legume
-    //   insertRationIngredient({
-    //     rationId: newRation.id,
-    //     ingredientId: formData.legume
-    //   })
+    //         // legume
+    //       insertRationIngredient({
+    //         rationId: newRation.id,
+    //         ingredientId: formData.legume
+    //       })
 
-    //     // feculent
-    //   insertRationIngredient({
-    //     rationId: newRation.id,
-    //     ingredientId: formData.feculent
-    //   })
+    //         // feculent
+    //       insertRationIngredient({
+    //         rationId: newRation.id,
+    //         ingredientId: formData.feculent
+    //       })
 
-    //     // huile
-    //   insertRationIngredient({
-    //     rationId: newRation.id,
-    //     ingredientId: formData.huile
-    //   })
+    //         // huile
+    //       insertRationIngredient({
+    //         rationId: newRation.id,
+    //         ingredientId: formData.huile
+    //       })
 
-    //   // calculate nutrition value:
-    //     // const nutri_info = calculate_nutri_info()
-    //     // console.log(nutri_info)
-    //     // insertNutritionalIngo to ration(pet_nutri_info)
-    //   }  catch (error) {
-    //     console.log('insertPetRation', insertPetRation)
+    //       // calculate quantité?
+    //       resetFields();
+    //           router.back()
+    //     },
+    //     onError: (error) => {
+    //       console.error('Error inserting new ration:', error);
+    //       // Handle any error here
+    //     },
     //   }
+    // )
 
 
   const resetFields = () => {
-    setFormData({
-      title: '',
-      comment: '',
-      type_r: 'PRO BARF (sans amidon)',
-      cmv: "Vit'i5 Orange (pot 600g)",
-      mode: '100% ration ménagère',
-      viande: '',
-      oeuf: '',
-      laitage: '',
-      legume: '',
-      feculent: '',
-      huile: '',
-    })
+    setFormData(initialState)
   }
 
-  const handleChange = (ingredient_type: string, id: string) => {
-    setFormData({ ...formData, [ingredient_type]: id });
+  const handleChange = (field: string, value: string) => {
+    setFormData({ ...formData, [field]: (typeof value === 'string') ? value : parseFloat(value)} );
   };
 
   const handleInputChange = (text: string) => {
@@ -227,13 +246,13 @@ const AddPetRationForm = () => {
 
   const selectItem = (ingredient_type: string, item: {id: string, title: string | null} | null) => {
     if (item) {
-      handleChange(ingredient_type, item.id)
+      handleChange(ingredient_type, item.id) // whole item instead
       // console.log('viande', item);
     }
   }
 
-  if (isViandeLoading || isOeufsLoading || isLaitagesLoading || isLegumesLoading || isFeculentsLoading || isHuilesLoading) return <ActivityIndicator/>
-  if (viandeError || oeufError || laitageError || legumeError || feculentError || huileError) return <Text>Erreur</Text>
+  if (isSubmitting || isNutritionalNeedsLoading || isViandeLoading || isOeufsLoading || isLaitagesLoading || isLegumesLoading || isFeculentsLoading || isHuilesLoading) return <ActivityIndicator size="large" color="#0000ff"/>
+  if (viandeError || nutritionalNeedsError || oeufError || laitageError || legumeError || feculentError || huileError) return <Text>Erreur</Text>
   return (
     <AutocompleteDropdownContextProvider>
 
@@ -413,6 +432,23 @@ const AddPetRationForm = () => {
         }}
         showChevron={false}
       />
+
+
+      <Text style={{color: 'white'}}>Objectif nutrition:</Text>
+      <View style={{flexDirection: 'row', alignItems: 'center'}}>
+        <Text style={{color: 'white'}}>1/</Text>
+        <TextInput
+          style={{flexShrink: 1,
+            height: 40,
+            marginHorizontal: 5,
+            paddingHorizontal: 5,
+            backgroundColor: 'white'}}
+          keyboardType="numeric"
+          value={formData.objective.toString()}
+          onChangeText={(text) => handleChange('objective', text)}
+          />
+        <Text style={{color: 'white'}}>des apports journaliers</Text>
+      </View>
 
       <View style={{ width: '100%', flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: '5%' }}>
         <Link href={`/pets/${id}` as any} asChild>

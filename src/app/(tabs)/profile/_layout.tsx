@@ -12,12 +12,24 @@ export default function ProfileStack () {
   }
   return <Stack>
    <Stack.Screen
-        name="index"
-        options={{ title: 'Mon profil' }}
-      />
+      name="index"
+      options={{ title: 'Mon profil', headerShown: false}}
+    />
    {/* <Stack.Screen
         name="[id]"
-        options={{ title: 'Product details' }}
+        options={{ title: 'Modifier mon profil details' }}
+      /> */}
+   {/* <Stack.Screen
+        name="[id]"
+        options={{ title: 'Inviter' }}
+      /> */}
+   {/* <Stack.Screen
+        name="[id]"
+        options={{ title: 'ressouces' }}
+      /> */}
+   {/* <Stack.Screen
+        name="[id]"
+        options={{ title: 'parametres' }}
       /> */}
 
 {/*

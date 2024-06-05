@@ -1,3 +1,22 @@
+export interface Theme {
+  colors : {
+    background: string;
+    buttonBackground: string;
+    border: string;
+    buttonText: string;
+    card: string;
+    notification: string;
+    primary: string;
+    text: string;
+    comment: string;
+    icon: string;
+    selectedIcon: string
+  // tint: string;
+  // tabIconDefault: string;
+  // tabIconSelected: string;
+  }
+}
+
 export interface Profile {
   id: string;
   username: string;
@@ -55,9 +74,9 @@ export type Weight = {
 export type Ration = {
   id: string,
   pet_id: number,
-  type_r: string,
+  type: string,
   cmv: string,
-  mode: string, // 
+  mode: string, //
   protein: number,
   fat: number,
   carb: number,
@@ -67,6 +86,7 @@ export type Ration = {
   potassium: number,
   title: string,
   comment: string,
+  calories: number,
   // viande: number,
   // oeuf_id: number,
   // laitage_id: number,

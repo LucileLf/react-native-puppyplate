@@ -4,6 +4,7 @@ import { Link, Stack, Tabs, useLocalSearchParams } from "expo-router";
 import { usePet } from "@/api/pets";
 import { ActivityIndicator } from "react-native";
 import { Text } from "react-native";
+import { useTheme } from "@react-navigation/native";
 
 // import Colors from "@/constants/Colors";
 // import { useColorScheme } from "@/components/useColorScheme";
@@ -19,6 +20,7 @@ import { Text } from "react-native";
 
 export default function PetStack () {
   // const colorScheme = useColorScheme();
+  const {colors} = useTheme();
 
   const { id } = useLocalSearchParams();
   const { data: pet, isLoading, error } = usePet(id)
@@ -26,19 +28,44 @@ export default function PetStack () {
   if (isLoading) return <ActivityIndicator/>
   if (error) return <Text>Error</Text>
 
-  return <Stack>
+  return <Stack
+    screenOptions={{
+      headerStyle: {
+        backgroundColor: colors.background, // Background color of the header
+      },
+      headerTintColor: colors.buttonText, // Color of the header title and buttons
+      headerTitleStyle: {
+        fontWeight: 'bold', // Example for setting font weight of the title
+      }
+    }}
+  >
 
-    <Stack.Screen
+    {/* <Stack.Screen
       name="index"
       options={{ title: 'Animal' }}
-    />
+    /> */}
     <Stack.Screen
       name="new-weight"
-      options={{ title: `Enregistrez un poids pour ${pet.name}` }}
+      options={{
+        title: `Enregistrez un poids pour ${pet.name}`,
+        headerTitleStyle: {
+          // fontFamily: 'YourFontFamily',
+          fontSize: 16,
+        }
+      }}
     />
     <Stack.Screen
       name="new-ration"
-      options={{ title: `Créez une ration ${pet.name}` }}
+      options={{
+        title: `Créez une ration pour ${pet.name}`,
+        headerTitleStyle: {
+          fontWeight: 'bold',
+        }
+      }}
+    />
+    <Stack.Screen
+      name="rations"
+      options={{ title: `Ration`}}
     />
 
   </Stack>;

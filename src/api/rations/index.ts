@@ -3,7 +3,6 @@ import { supabase } from '@/lib/supabase';
 import { NutritionalNeeds, Pet, Weight } from '@/types';
 import { PetDetails } from '@/components/PetDetails';
 
-
 // READ PET RATIONS
 export const usePetRations = (petId: string, { enabled = true }) => {
   console.log('api looking from rations with pet_id', petId);
@@ -158,10 +157,12 @@ export const useUpdateRationToCurrent = ( id: string | string[] ) =>  {
     //invalidate the query cache for the 'products' key --> query get executed again
     onSuccess: async () => {
       await queryClient.invalidateQueries({queryKey:['rations']});
-      if (typeof id === 'string') {
-        // Invalidate specific ration query if a single id was provided
-        await queryClient.invalidateQueries({queryKey: ['rations', id]});
-      }
+      await queryClient.invalidateQueries({ queryKey: ['currentRation', id] });
+
+      // await queryClient.invalidateQueries({ queryKey: ['pets', id, 'rations'] });
+      // if (typeof id === 'string') {
+      //   await queryClient.invalidateQueries({queryKey: ['rations', id]});
+      // }
     },
      onError: (error) => {
       console.error('Failed to update ration', error);
@@ -281,11 +282,12 @@ export const useInsertPetRation = () =>  {
 export const useInsertRationIngredient = () =>  {
   const queryClient = useQueryClient();
   return useMutation({
-    async mutationFn({rationId, ingredientId}: any) {
+    async mutationFn({rationId, ingredientId, quantity}: any) {
       console.log(`inserting ingredient ${ingredientId} to ration ${rationId}`, )
       const { error, data: newRationIngredient } = await supabase.from('ration_ingredients').insert({
         ration_id: rationId,
-        ingredient_id: ingredientId
+        ingredient_id: ingredientId,
+        quantity_g: quantity
       })
       .select()
       .single()

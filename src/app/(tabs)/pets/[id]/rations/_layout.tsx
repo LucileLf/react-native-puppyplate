@@ -7,13 +7,13 @@ export default function RationsStack () {
 
   return <Stack>
    <Stack.Screen
-        name="index"
-        options={{ title: 'Mes recettes' }}
-      />
-   <Stack.Screen
         name="[id]"
-        options={{ title: 'Recipe details' }}
+        options={{ title: 'Ration', headerShown: false }}
       />
+   {/* <Stack.Screen
+        name="[id]"
+        options={{ title: 'Product details' }}
+      /> */}
 
 {/*
 by default, title will be name of file (index, [id])

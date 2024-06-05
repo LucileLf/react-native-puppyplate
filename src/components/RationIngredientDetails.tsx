@@ -1,6 +1,6 @@
 import { Ration } from "@/types";
 import { View, Text, Image, StyleSheet, ScrollView, FlatList, Pressable, ActivityIndicator } from 'react-native'
-import rationPicture from '@assets/images/dog-food.jpg'
+// import rationPicture from '@assets/images/dog-food.jpg'
 import { Link } from 'expo-router';
 import { useIngredient } from "@/api/rations";
 
@@ -20,7 +20,7 @@ export const RationIngredientDetails = ({ ingredient_id }: RationIngredientDetai
   if (!ingredient || ingredientError) {return <Text>ingredient details not found</Text>}
 
   return (
-    <Text>{ingredient.FOOD_LABEL}</Text>
+    <Text>{ingredient.title}</Text>
     // <Link href={`/rations/${ration?.id}`} asChild>
     //   <Pressable style={styles.rationContainer}>
     //     <Image

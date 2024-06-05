@@ -1,11 +1,18 @@
 
-import { Pet, Weight } from '@/types';
+import { Pet, ProfileImages, Weight } from '@/types';
 // import fridaImage from '@assets/images/Frida.jpg';
 import gastonImage from '@assets/images/gaston.webp';
 import bellaImage from '@assets/images/bella.webp';
 import leoImage from '@assets/images/leo.webp';
 import maxImage from '@assets/images/max.jpg';
 
+
+export const petImages: ProfileImages = {
+  'b695fa52-4d5d-4855-9776-2619d6a7cd2c': require('@assets/images/nala.jpg'),
+  // Add more keys and requires for other images
+  'c450d0e3-9996-4b14-a217-8602640e0c12': require('@assets/images/ziggy.jpg'),
+  defaultImage: require('@assets/images/no-pet-image.webp'), // Default/fallback image
+};
 // export const pets: Pet[] = [
 //   {
 //     id: 1,

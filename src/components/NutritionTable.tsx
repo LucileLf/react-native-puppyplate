@@ -8,9 +8,6 @@ interface NutritionTableProps {
 
 const NutritionTable = ({nutritionalNeeds} : NutritionTableProps) => {
 
-
-
-
   console.log('nutritionalNeeds', nutritionalNeeds)
 
   return (
@@ -21,9 +18,9 @@ const NutritionTable = ({nutritionalNeeds} : NutritionTableProps) => {
         <Text style={styles.cell}>Calcium</Text>
       </View>
       <View style={styles.row}>
-        <Text style={styles.cell}>{nutritionalNeeds.calories}</Text>
+        <Text style={styles.cell}>{Math.floor(nutritionalNeeds.calories)}</Text>
         <Text style={styles.cell}>{nutritionalNeeds.rpc}</Text>
-        <Text style={styles.cell}>{nutritionalNeeds.calcium}</Text>
+        <Text style={styles.cell}>{Math.floor(nutritionalNeeds.calcium * 100) / 100}</Text>
       </View>
     </View>
   );

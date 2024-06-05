@@ -19,10 +19,16 @@ import { useAuth } from '@/providers/AuthProvider';
 import { useInsertPet, useBreedList, useActivityList, useStageList, useEnvList, useVegList, useInsertNutritionalNeeds, useAddPetToNN, useInsertInitialPetWeight } from '@/api/pets';
 import { randomUUID } from 'expo-crypto'
 import { supabase } from '@/lib/supabase';
+import { colors } from 'react-native-elements';
+import { useTheme } from '@react-navigation/native';
+
+// https://www.npmjs.com/package/react-native-autocomplete-dropdown#dataset-item-format
+
 
 const choices = [choice1, choice2, choice3, choice4, choice5, choice6, choice7, choice8, choice9]
 
 const AddPetForm = () => {
+  const {colors} = useTheme();
 
   const router = useRouter();
   const { session, loading } = useAuth()
@@ -289,6 +295,79 @@ const AddPetForm = () => {
 
   // <Stack.Screen options={{ title: 'Ajouter un animal'}} />
 
+  const styles = StyleSheet.create({
+    container: {
+      flexGrow: 1
+    },
+    title: {
+      fontSize: 20,
+      fontWeight: 'bold',
+      marginBottom: 20,
+    },
+    input: {
+      width: '80%',
+      height: 40,
+      borderColor: 'gray',
+      borderWidth: 1,
+      marginBottom: 10,
+      paddingHorizontal: 10,
+      backgroundColor: 'white',
+      borderRadius: 8,
+      display: 'flex',
+      // alignItems: 'center',
+      justifyContent: 'center',
+    },
+    pickerContent: {
+      height: '100%',
+    },
+    choices: {
+      // width: '100%',
+      // flexDirection: 'row',
+      // alignItems: 'center',
+      // justifyContent: 'space-around'
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      justifyContent: 'space-around',
+      alignItems: 'center',
+    },
+    choicePressable: {
+      width: '33%',
+      height: 100,
+    },
+    choice: {
+      width: '100%',
+      height: 100,
+      resizeMode: 'contain'
+    },
+    label: {
+      fontWeight: 'bold',
+      color: 'white',
+    },
+    switch: {
+    },
+    image: {
+      width: '35%',
+      aspectRatio: 1
+    },
+    imgButton: {
+      backgroundColor: 'white',
+      width: '10%',
+      height: 'auto',
+      borderRadius: 2
+    },
+    link: {
+      marginTop: 20,
+      textDecorationLine: 'underline',
+    },
+    submitButton: {
+      backgroundColor: colors.buttonBackground,
+      padding: 10,
+      borderRadius: 5,
+      alignItems: 'center',
+      justifyContent: 'center'
+    }
+  });
+
   return (
 
     <ScrollView
@@ -296,7 +375,7 @@ const AddPetForm = () => {
       contentContainerStyle={{ alignItems: 'center', justifyContent: 'center', paddingVertical: 50}}
     >
 
-      <Text style={{color:'white'}}>Cat or dog</Text>
+      <Text style={styles.label}>Nom</Text>
 
       <TextInput
         style={styles.input}
@@ -307,24 +386,27 @@ const AddPetForm = () => {
 
       <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}>
         <Image source={ formData.image || defaultImage } style={styles.image}/>
-        <Text style={{color: 'white'}}>Selectionner </Text>
+        <Text style={styles.label}>Selectionner </Text>
         <TouchableOpacity onPress={pickImage} style={styles.imgButton}>
           <Text style={{textAlign: 'center', fontWeight: '500'}}>...</Text>
         </TouchableOpacity>
         {/* <Text onPress={pickImage} style={styles.textButton}>Select Image</Text> */}
       </View>
 
-      <Text style={{ color: 'white' }}>Race</Text>
-      <Picker
-        selectedValue={formData.breed}
-        style={styles.input}
-        onValueChange={(itemValue) => handleChange('breed', itemValue)}>
-          {breedsData?.map((breed) =>
-            <Picker.Item key={breed.id} label={breed.breed} value={breed} />
-          )}
-      </Picker>
+      <Text style={styles.label}>Race</Text>
 
-      <Text style={{ color: 'white' }}>Sexe</Text>
+      <View style={styles.input}>
+        <Picker
+          selectedValue={formData.breed}
+          style={styles.pickerContent}
+          onValueChange={(itemValue) => handleChange('breed', itemValue)}>
+            {breedsData?.map((breed) =>
+              <Picker.Item key={breed.id} label={breed.breed} value={breed} />
+            )}
+        </Picker>
+      </View>
+
+      <Text style={styles.label}>Sexe</Text>
       <Picker
         selectedValue={formData.sexe}
         style={styles.input}
@@ -333,6 +415,7 @@ const AddPetForm = () => {
           <Picker.Item label='male' value='M' />
       </Picker>
 
+      <Text style={styles.label}>Poids actuel</Text>
       <TextInput
         style={styles.input}
         placeholder="Poids"
@@ -340,6 +423,8 @@ const AddPetForm = () => {
         value={formData.weight.toString()}
         onChangeText={(text) => handleChange('weight', parseFloat(text) || 0)}
       />
+
+<Text style={styles.label}>Forme: </Text>
       <View style={styles.choices}>
         {choices.map((image, index)=>
           <TouchableOpacity style={styles.choicePressable} key={index} onPress={() => calculateIdealWeight(index)}>
@@ -352,7 +437,7 @@ const AddPetForm = () => {
         )}
       </View>
 
-      <Text>Poids idéal:</Text>
+      <Text style={styles.label}>Poids idéal:</Text>
       <TextInput
         editable={false}
         style={styles.input}
@@ -362,7 +447,7 @@ const AddPetForm = () => {
       />
       <Text>placeholder visible? + checkbox to allow custom target weight</Text>
 
-      <Text style={{ color: 'white' }}>Niveau d'activité</Text>
+      <Text style={styles.label}>Niveau d'activité</Text>
       <Picker
         selectedValue={formData.activity}
         style={styles.input}
@@ -373,7 +458,7 @@ const AddPetForm = () => {
         ))}
       </Picker>
 
-      <Text style={{ color: 'white' }}>Stade de vie</Text>
+      <Text style={styles.label}>Stade de vie</Text>
       <Picker
         selectedValue={formData.life_stage}
         style={styles.input}
@@ -394,7 +479,7 @@ const AddPetForm = () => {
         />
       </View>
 
-      <Text style={{ color: 'white' }}>Lieu de vie</Text>
+      <Text style={styles.label}>Lieu de vie</Text>
       <Picker
         selectedValue={formData.lieu_de_vie}
         style={styles.input}
@@ -405,7 +490,7 @@ const AddPetForm = () => {
         ))}
       </Picker>
 
-      <Text style={{ color: 'white' }}>Quantité de légumes</Text>
+      <Text style={styles.label}>Quantité de légumes</Text>
       <Picker
         selectedValue={formData.quantite_legumes}
         style={styles.input}
@@ -420,69 +505,14 @@ const AddPetForm = () => {
         <Link href="/pets/" asChild>
           <Text style={styles.link}>Cancel</Text>
         </Link>
-        <Button title="Submit" onPress={handleSubmit} />
+        <Pressable style={styles.submitButton} onPress={handleSubmit}>
+          <Text style= {{color: colors.buttonText}}>Confirmer</Text>
+        </Pressable>
       </View>
     </ScrollView>
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flexGrow: 1
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 20,
-  },
-  input: {
-    width: '80%',
-    height: 40,
-    borderColor: 'gray',
-    borderWidth: 1,
-    marginBottom: 10,
-    paddingHorizontal: 10,
-    backgroundColor: 'white'
-  },
-  choices: {
-    // width: '100%',
-    // flexDirection: 'row',
-    // alignItems: 'center',
-    // justifyContent: 'space-around'
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-  },
-  choicePressable: {
-    width: '33%',
-    height: 100,
-  },
-  choice: {
-    width: '100%',
-    height: 100,
-    resizeMode: 'contain'
-  },
-  label: {
-    color: 'white',
-  },
-  switch: {
-  },
-  image: {
-    width: '35%',
-    aspectRatio: 1
-  },
-  imgButton: {
-    backgroundColor: 'white',
-    width: '10%',
-    height: 'auto',
-    borderRadius: 2
-  },
-  link: {
-    marginTop: 20,
-    color: 'white',
-    textDecorationLine: 'underline',
-  },
-});
+
 
 export default AddPetForm;

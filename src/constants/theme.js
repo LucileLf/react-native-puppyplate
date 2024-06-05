@@ -1,51 +1,77 @@
-const COLORS = {
-  primary: "#312651",
-  secondary: "#444262",
-  tertiary: "#FF7754",
+// const COLORS = {
+//   primary: "#312651",
+//   secondary: "#444262",
+//   tertiary: "#FF7754",
 
-  gray: "#83829A",
-  gray2: "#C1C0C8",
+//   gray: "#83829A",
+//   gray2: "#C1C0C8",
 
-  white: "#F3F4F8",
-  lightWhite: "#FAFAFC",
-};
+//   white: "#F3F4F8",
+//   lightWhite: "#FAFAFC",
+// };
 
-const FONT = {
-  regular: "DMRegular",
-  medium: "DMMedium",
-  bold: "DMBold",
-};
+// const FONT = {
+//   regular: "DMRegular",
+//   medium: "DMMedium",
+//   bold: "DMBold",
+// };
 
-const SIZES = {
-  xSmall: 10,
-  small: 12,
-  medium: 16,
-  large: 20,
-  xLarge: 24,
-  xxLarge: 32,
-};
+// const SIZES = {
+//   xSmall: 10,
+//   small: 12,
+//   medium: 16,
+//   large: 20,
+//   xLarge: 24,
+//   xxLarge: 32,
+// };
 
-const SHADOWS = {
-  small: {
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 2,
-  },
-  medium: {
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 5.84,
-    elevation: 5,
-  },
-};
+// const SHADOWS = {
+//   small: {
+//     shadowColor: "#000",
+//     shadowOffset: {
+//       width: 0,
+//       height: 2,
+//     },
+//     shadowOpacity: 0.25,
+//     shadowRadius: 3.84,
+//     elevation: 2,
+//   },
+//   medium: {
+//     shadowColor: "#000",
+//     shadowOffset: {
+//       width: 0,
+//       height: 2,
+//     },
+//     shadowOpacity: 0.25,
+//     shadowRadius: 5.84,
+//     elevation: 5,
+//   },
+// };
 
-export { COLORS, FONT, SIZES, SHADOWS };
+// export { COLORS, FONT, SIZES, SHADOWS };
+
+
+// export const lightTheme = {
+//   text: '#000',
+//   background: '#fff',
+//   tint: '#78a112',
+//   tabIconDefault: '#ccc',
+//   tabIconSelected: '#78a112',
+//   buttonBackground: '#78a112',
+//   buttonText: '#fff',
+// };
+
+// export const darkTheme = {
+//   text: '#fff',
+//   background: '#000',
+//   tint: '#fff',
+//   tabIconDefault: '#ccc',
+//   tabIconSelected: '#fff',
+//   buttonBackground: '#333',
+//   buttonText: '#fff',
+// };
+
+// export const ThemeContext = React.createContext({
+//   theme: lightTheme, // Default theme
+//   setTheme: () => {},
+// });
