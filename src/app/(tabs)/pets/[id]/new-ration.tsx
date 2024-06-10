@@ -83,11 +83,11 @@ const AddPetRationForm = () => {
     }
   }, []);
 
-  // useEffect(() => {
-  //   if (ingredientSearchInput.length >= 3) {
-  //     fetchSearchResults(ingredientSearchInput);
-  //   }
-  // }, [ingredientSearchInput, fetchSearchResults]);
+  useEffect(() => {
+    if (ingredientSearchInput.length >= 3) {
+      fetchSearchResults(ingredientSearchInput, currentIngredientType);
+    }
+  }, [ingredientSearchInput, fetchSearchResults]);
 
   
   useEffect(() => {
