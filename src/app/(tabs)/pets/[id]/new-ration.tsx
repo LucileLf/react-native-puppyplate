@@ -1,11 +1,15 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { View, Text, TextInput, Button, Switch, StyleSheet, ScrollView, Image, Pressable, TouchableOpacity, ActivityIndicator, Platform, FlatList } from 'react-native';
-import { useIngredientSubGroup, useInsertPetRation, useInsertRationIngredient } from '@/api/rations';
+import { useIngredientSubGroup, useInsertPetRation, useInsertRationIngredient, useIngredientsByName } from '@/api/rations';
 import { AutocompleteDropdownContextProvider, AutocompleteDropdown  } from 'react-native-autocomplete-dropdown';
 import { Picker } from '@react-native-picker/picker';
 import { supabase } from '@/lib/supabase';
 import { Link, useLocalSearchParams, useRouter } from 'expo-router';
 import { usePetNutritionalNeeds } from '@/api/pets';
+import { MaterialCommunityIcons, AntDesign } from '@expo/vector-icons';
+import {IngredientSearchItem} from '@/components/IngredientSearchItem'
+import { log } from 'console';
+import {Ingredient} from '@/types'
 // import { usePet, usePetNutritionalNeeds } from '@/api/pets';
 
 const AddPetRationForm = () => {
@@ -20,6 +24,7 @@ const AddPetRationForm = () => {
   const [cmvEnum, setCmvEnum] = useState([]);
   const [modeEnum, setModeEnum] = useState([]);
 
+
   const {data: viandes, isLoading: isViandeLoading, error: viandeError} = useIngredientSubGroup('viande');
   const {data: oeufs, isLoading: isOeufsLoading, error: oeufError} = useIngredientSubGroup('oeuf');
   const {data: laitages, isLoading: isLaitagesLoading, error: laitageError} = useIngredientSubGroup('laitage');
@@ -29,9 +34,35 @@ const AddPetRationForm = () => {
   const {mutate: insertPetRation, error: insertPetRationError} = useInsertPetRation(); // hook returns a function
   const {mutate: insertRationIngredient, error: insertRationIngredientError} = useInsertRationIngredient(); // hook returns a function
   const [isSubmitting, setIsSubmitting] = useState(false);
-
+  
   const {data: nutritionalNeeds, isLoading: isNutritionalNeedsLoading, error: nutritionalNeedsError} = usePetNutritionalNeeds(petId, {enabled: true});
+  
+  const [pickerOpened, setPickerOpened] = useState(false);
+  const [ingredientSearchInput, setIngredientSearchInput] = useState('');
+  const [ingredientsSearchResults, setIngredientsSearchResults] = useState([]);
+  const [currentIngredientType, setCurrentIngredientType] = useState('');
 
+  // const {data: ingredientsSearchResults, isLoading: isIngredientsSearchResultsLoading, error: ingredientsSearchResultsError} = useIngredientsByName();
+
+  const fetchSearchResults = useCallback(async (query: string) => {
+    console.log('looking for ingredients with title like', query)
+    if (!query) return;
+    const { data, error } = await supabase.from('ingredients').select('*').ilike('title', `%${query}%`);
+    if (error) {
+      console.error('Error fetching search results:', error);
+    } else {
+      console.log('found', data)
+      setIngredientsSearchResults(data);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (ingredientSearchInput.length >= 3) {
+      fetchSearchResults(ingredientSearchInput);
+    }
+  }, [ingredientSearchInput, fetchSearchResults]);
+
+  
   useEffect(() => {
     // fetch type_r
     async function fetchTypeREnum() {
@@ -78,24 +109,43 @@ const AddPetRationForm = () => {
     fetchModeEnum();
   }, []);
 
-  const initialState = {
+  const ingredientTypes = ['viande', 'oeuf', 'laitage', 'legume', 'feculent', 'huile'] as const;
+
+type IngredientType = typeof ingredientTypes[number];
+
+interface FormData {
+  title: string;
+  comment: string;
+  type_r: string;
+  cmv: string;
+  mode: string;
+  viande: { id: string; title: string };
+  oeuf: { id: string; title: string };
+  laitage: { id: string; title: string };
+  legume: { id: string; title: string };
+  feculent: { id: string; title: string };
+  huile: { id: string; title: string };
+  objective: number;
+}
+
+  const initialState: FormData = {
     title: '',
     comment: '',
     type_r: 'PRO BARF (sans amidon)',
     cmv: "Vit'i5 Orange (pot 600g)",
     mode: '100% ration ménagère',
-    viande: '',
-    oeuf: '',
-    laitage: '',
-    legume: '',
-    feculent: '',
-    huile: '',
+    viande: { id: '', title: '' },
+    oeuf: { id: '', title: '' },
+    laitage: { id: '', title: '' },
+    legume: { id: '', title: '' },
+    feculent: { id: '', title: '' },
+    huile: { id: '', title: '' },
     objective: 1,
   }
 
-  const [formData, setFormData] = useState(initialState);
+  const [formData, setFormData] = useState<FormData>(initialState);
 
-  const calculate_quantity = (ingredientId: string) => {
+  const calculate_quantity = (rationIngredient: { id: string, title: string }) => {
     // TO DO
     //fetch ingredient from id
 
@@ -177,82 +227,68 @@ const AddPetRationForm = () => {
     }
   }
 
-    // insertPetRation(
-    //   {petId: Array.isArray(petId) ? petId[0] : petId, data: formData},
-    //   {
-    //     onSuccess: (newRation: any) => {
-    //       console.log('ration inserted successfully', newRation);
-    //       // insert ration ingredients (without quantity)
-
-    //       insertRationIngredient({
-
-    //         rationId: newRation.id,
-    //         ingredientId: formData.viande
-    //       })
-    //         // oeuf
-    //       insertRationIngredient({
-    //         rationId: newRation.id,
-    //         ingredientId: formData.oeuf
-    //       })
-
-    //         // laitage
-    //       insertRationIngredient({
-    //         rationId: newRation.id,
-    //         ingredientId: formData.laitage
-    //       })
-
-    //         // legume
-    //       insertRationIngredient({
-    //         rationId: newRation.id,
-    //         ingredientId: formData.legume
-    //       })
-
-    //         // feculent
-    //       insertRationIngredient({
-    //         rationId: newRation.id,
-    //         ingredientId: formData.feculent
-    //       })
-
-    //         // huile
-    //       insertRationIngredient({
-    //         rationId: newRation.id,
-    //         ingredientId: formData.huile
-    //       })
-
-    //       // calculate quantité?
-    //       resetFields();
-    //           router.back()
-    //     },
-    //     onError: (error) => {
-    //       console.error('Error inserting new ration:', error);
-    //       // Handle any error here
-    //     },
-    //   }
-    // )
-
 
   const resetFields = () => {
     setFormData(initialState)
   }
 
-  const handleChange = (field: string, value: string) => {
-    setFormData({ ...formData, [field]: (typeof value === 'string') ? value : parseFloat(value)} );
+  const handleChange = (field: string, value: any) => {
+    setFormData({ ...formData, [field]: value});
+    console.log('formdata.viande',formData.viande)
   };
 
-  const handleInputChange = (text: string) => {
-    setInputValue(text);
-    setShowSuggestions(text.length >= 3);
-  };
 
-  const selectItem = (ingredient_type: string, item: {id: string, title: string | null} | null) => {
+  const selectItem = (ingredientType: string, item: {id: string, title: string} | null) => {
     if (item) {
-      handleChange(ingredient_type, item.id) // whole item instead
+      handleChange(ingredientType, item) 
       // console.log('viande', item);
+      setPickerOpened(false);
     }
   }
 
+  const handleIngredientSearchItemSelect = (item: Ingredient) => {
+    console.log('choosing',item)
+    if (currentIngredientType) {
+      handleChange(currentIngredientType, item);
+      setIngredientSearchInput('')
+      setIngredientsSearchResults([])
+      setPickerOpened(false);
+    }
+  };
+
+  const openPicker = (ingredientType: string) => {
+    setCurrentIngredientType(ingredientType);
+    setPickerOpened(true);
+  };
+
+
   if (isSubmitting || isNutritionalNeedsLoading || isViandeLoading || isOeufsLoading || isLaitagesLoading || isLegumesLoading || isFeculentsLoading || isHuilesLoading) return <ActivityIndicator size="large" color="#0000ff"/>
   if (viandeError || nutritionalNeedsError || oeufError || laitageError || legumeError || feculentError || huileError) return <Text>Erreur</Text>
+  
+  if (pickerOpened) {
+    console.log('opening picker') 
+    return (
+      <View style={styles.pickerContainer}>
+          <AntDesign onPress={() => setPickerOpened(false)} name="close" size={30} color="black" style={{position: 'absolute', right: 10, top: 10}}/>
+          <View style={{flexDirection: 'row', alignItems: 'center',gap: 10}}>
+            <TextInput value={ingredientSearchInput} onChangeText={setIngredientSearchInput} placeholder='Search...' style={styles.input}/>
+            <Button title='Search' onPress={() => fetchSearchResults(ingredientSearchInput)} />
+            {/* ingredientsSearchResults, isLoading: isIngredientsSearchResultsLoading, error: ingredientsSearchResultsError */}
+          </View>
+          {/* <Button title='Search' onPress={performSearch}/> */}
+
+          {/* {loading && <ActivityIndicator/>} */}
+          <FlatList
+            data={ingredientsSearchResults}
+            renderItem={({item})=> <IngredientSearchItem item={item} onSelect={handleIngredientSearchItemSelect}/>}
+            ListEmptyComponent={() => <Text>Type something and click search to show results</Text>} // render when there is no data
+            contentContainerStyle={{gap: 5}}
+            style={styles.searchResultsContainer}
+          />
+      </View>
+
+    )
+  }
   return (
     <AutocompleteDropdownContextProvider>
 
@@ -314,8 +350,25 @@ const AddPetRationForm = () => {
       </Picker>
       {/* <Text style={{color: 'white'}}>{formData.mode}</Text> */}
 
-      <Text style={{color: 'white'}}>Viande</Text>
-      <AutocompleteDropdown
+
+
+      {ingredientTypes.map((ingredientType) => (
+        <Pressable key={ingredientType} style={styles.input} onPress={() => openPicker(ingredientType)}>
+          <Text>
+            {formData[ingredientType].title || ingredientType.charAt(0).toUpperCase() + ingredientType.slice(1)}
+          </Text>
+        </Pressable>
+      ))}
+
+
+
+
+
+
+
+
+      
+      {/*<AutocompleteDropdown
         clearOnFocus={false}
         closeOnBlur={true}
         closeOnSubmit={false}
@@ -326,8 +379,8 @@ const AddPetRationForm = () => {
         inputContainerStyle={[styles.input, {position: 'relative'}]}
 
         showChevron={false}
-      />
-
+      />*/}
+{/* 
       <Text style={{color: 'white'}}>Oeuf</Text>
       <AutocompleteDropdown
         clearOnFocus={false}
@@ -431,7 +484,7 @@ const AddPetRationForm = () => {
           overflow: 'scroll',
         }}
         showChevron={false}
-      />
+      /> */}
 
 
       <Text style={{color: 'white'}}>Objectif nutrition:</Text>
@@ -530,6 +583,42 @@ const styles = StyleSheet.create({
     // Style for your list items
     backgroundColor: 'white',
     padding: 10,
+  },
+  pickerContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  // itemText: {
+  //   backgroundColor: 'white',
+  //   padding: 10,
+  //   marginVertical: 5,
+  //   borderRadius: 5,
+  // }, 
+  dropdown: {
+    height: 40,
+    borderColor: 'gray',
+    borderWidth: 1,
+    padding: 10,
+    justifyContent: 'center',
+    borderRadius: 5,
+    backgroundColor: 'white',
+  },
+  pickerOverlay: {
+    position: 'absolute',
+    top: 40,
+    left: 0,
+    right: 0,
+    backgroundColor: 'white',
+    zIndex: 1000,
+  },
+  searchResultsContainer: {
+    backgroundColor: 'white'
   }
 });
 

@@ -103,9 +103,12 @@ export type RationIngredient = {
   quantity_g: number
 }
 
+export type IngredientType = 'viande' | 'oeuf' | 'laitage' | 'legume' | 'feculent' | 'huile';
+
+
 export type Ingredient = {
-  id: number;
-  name: string,
+  id: string;
+  title: string,
   type: string,
   calories: number,
   proteins: number,
@@ -116,4 +119,5 @@ export type Ingredient = {
   calcium: number,
   phosphorus: number,
   potassium: number,
+  alim_ssgrp_nom_fr: string
 }

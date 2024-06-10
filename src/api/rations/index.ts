@@ -128,6 +128,31 @@ export const useIngredients = (ingredientIds: string[], { enabled = true } = {})
   });
 };
 
+
+
+export const useIngredientsByName = (ingredientsName: string, { enabled = true } = {}) => {
+  console.log('looking for ingredients like', ingredientsName);
+  return useQuery({
+    queryKey: ['ingredients', ingredientsName],
+    queryFn: async () => {
+      if (!enabled|| !ingredientsName || ingredientsName.length === 0) {
+        return null;
+      }
+      const { data, error } = await supabase
+        .from('ingredients')
+        .select('*')
+        .ilike('title', `%${ingredientsName}%`);
+      if (error) {
+        throw new Error(error.message);
+      }
+      return data;
+    },
+    enabled: enabled && ingredientsName.length > 0,
+  });
+};
+
+
+
 export const useUpdateRationToCurrent = ( id: string | string[] ) =>  {
   const queryClient = useQueryClient();
   console.log("hi from update ration to current");

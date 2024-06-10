@@ -1,6 +1,7 @@
 
 import { Ingredient, Ration, RationIngredient } from '@/types';
 
+
 export const ingredients: Ingredient[] = [
   {
     id: 1,
@@ -88,6 +89,20 @@ export const ingredients: Ingredient[] = [
   },
 ];
 
+
+
+export const ingredientSubgroups = {
+  viande: [
+    'viandes cuites', 'viandes crues', 'charcuteries et assimilés', 'autres produits à base de viande',
+    'poissons cuits', 'poissons crus', 'mollusques et crustacés cuits', 'mollusques et crustacés crus',
+    'produits à base de poissons et produits de la mer', 'substitus de produits carnés'
+  ],
+  oeuf: ['oeufs'],
+  laitage: ['laits', 'produits laitiers frais et assimilés', 'fromages et assimilés', 'crèmes et spécialités à base de crème'],
+  legume: ['légumes'],
+  feculent: ['légumineuses', 'pommes de terre et autres tubercules', 'pâtes, riz et céréales'],
+  huile: ['huiles et graisses végétales', 'huiles de poissons', 'autres matières grasses'],
+};
 
 // export const rations: Ration[] = [
 //   {
