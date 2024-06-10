@@ -10,6 +10,7 @@ import { MaterialCommunityIcons, AntDesign } from '@expo/vector-icons';
 import {IngredientSearchItem} from '@/components/IngredientSearchItem'
 import { log } from 'console';
 import {Ingredient} from '@/types'
+
 // import { usePet, usePetNutritionalNeeds } from '@/api/pets';
 
 const AddPetRationForm = () => {
@@ -44,23 +45,49 @@ const AddPetRationForm = () => {
 
   // const {data: ingredientsSearchResults, isLoading: isIngredientsSearchResultsLoading, error: ingredientsSearchResultsError} = useIngredientsByName();
 
-  const fetchSearchResults = useCallback(async (query: string) => {
+  const filterIngredientsByType = (ingredientType: string, ingredients: Ingredient[]) => {
+    let subgroups: String[]
+    switch(ingredientType) {
+      case 'viande':
+        subgroups = ['viandes cuites', 'viandes crues', 'charcuteries et assimilés', 'autres produits à base de viande', 'poissons cuits', 'poissons crus', 'mollusques et crustacés cuits', 'mollusques et crustacés crus', 'produits à base de poissons et produits de la mer', 'substitus de produits carnés']
+        break;
+      case 'oeuf':
+        subgroups = ['oeufs']
+        break;
+      case 'laitage':
+        subgroups = ['laits', 'produits laitiers frais et assimilés', 'fromages et assimilés', 'crèmes et spécialités à base de crème']
+        break;
+      case 'legume':
+        subgroups = ['légumes']
+        break;
+      case 'feculent':
+        subgroups = ['légumineuses', 'pommes de terre et autres tubercules', 'pâtes, riz et céréales']
+        break;
+      case 'huile':
+        subgroups = ['huiles et graisses végétales', 'huiles de poissons', 'autres matières grasses']
+        break;
+    }
+    return ingredients.filter(ingredient => subgroups.includes(ingredient.alim_ssgrp_nom_fr));
+  };
+
+  const fetchSearchResults = useCallback(async (query: string, ingredientType: string) => {
     console.log('looking for ingredients with title like', query)
     if (!query) return;
-    const { data, error } = await supabase.from('ingredients').select('*').ilike('title', `%${query}%`);
+    const { data: results, error } = await supabase.from('ingredients').select('*').ilike('title', `%${query}%`);
     if (error) {
       console.error('Error fetching search results:', error);
     } else {
-      console.log('found', data)
-      setIngredientsSearchResults(data);
+      console.log('found', results)
+      const filteredResults = filterIngredientsByType(ingredientType, results);
+      setIngredientsSearchResults(filteredResults);
     }
   }, []);
 
-  useEffect(() => {
-    if (ingredientSearchInput.length >= 3) {
-      fetchSearchResults(ingredientSearchInput);
-    }
-  }, [ingredientSearchInput, fetchSearchResults]);
+  // useEffect(() => {
+  //   if (ingredientSearchInput.length >= 3) {
+  //     fetchSearchResults(ingredientSearchInput);
+  //   }
+  // }, [ingredientSearchInput, fetchSearchResults]);
 
   
   useEffect(() => {
@@ -272,7 +299,7 @@ interface FormData {
           <AntDesign onPress={() => setPickerOpened(false)} name="close" size={30} color="black" style={{position: 'absolute', right: 10, top: 10}}/>
           <View style={{flexDirection: 'row', alignItems: 'center',gap: 10}}>
             <TextInput value={ingredientSearchInput} onChangeText={setIngredientSearchInput} placeholder='Search...' style={styles.input}/>
-            <Button title='Search' onPress={() => fetchSearchResults(ingredientSearchInput)} />
+            <Button title='Search' onPress={() => fetchSearchResults(ingredientSearchInput, currentIngredientType)} />
             {/* ingredientsSearchResults, isLoading: isIngredientsSearchResultsLoading, error: ingredientsSearchResultsError */}
           </View>
           {/* <Button title='Search' onPress={performSearch}/> */}
@@ -286,9 +313,10 @@ interface FormData {
             style={styles.searchResultsContainer}
           />
       </View>
-
     )
   }
+
+
   return (
     <AutocompleteDropdownContextProvider>
 
